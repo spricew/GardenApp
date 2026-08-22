@@ -114,14 +114,14 @@ export default function NewServiceScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-      <ScrollView className="flex-1 bg-warm-canvas">
+      <ScrollView>
         <View className="px-6 pt-6 pb-12">
           {/* Header */}
           <View className="flex-row items-center mb-8">
             <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
               <Text className="text-[28px] font-light text-graphite leading-none">←</Text>
             </Pressable>
-            <Text className="font-display font-medium text-[44px] text-charcoal-primary tracking-[-1.14px] leading-[1.09]">
+            <Text className="font-display font-medium text-heading-lg text-charcoal-primary tracking-[-1.14px]">
               Nuevo
             </Text>
           </View>

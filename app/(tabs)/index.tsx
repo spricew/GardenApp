@@ -30,12 +30,6 @@ export default function TodayScreen() {
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
 
       <View className="flex-1 bg-warm-canvas">
-        {/* <View className="p-6">
-          <Text className="font-display font-semibold text-5xl text-charcoal-primary tracking-[-0.04em]">
-            Servicios de Hoy
-          </Text>
-        </View> */}
-
         {/* Filter chips */}
         <FlatList
           // horizontal

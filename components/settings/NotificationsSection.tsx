@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Alert } from "react-native";
 import { useNotifications } from "../../hooks/useNotifications";
-import { SettingsCard } from "./SettingsCard";
+import { Card } from "../Card";
 
 export function NotificationsSection() {
   const { hasPermission, requestPermission } = useNotifications();
@@ -17,7 +17,7 @@ export function NotificationsSection() {
   };
 
   return (
-    <SettingsCard title="🔔 Notificaciones">
+    <Card title="🔔 Notificaciones">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 mr-4">
           <Text className="font-sans font-medium text-[15px] text-charcoal-primary">
@@ -42,6 +42,6 @@ export function NotificationsSection() {
           </Pressable>
         )}
       </View>
-    </SettingsCard>
+    </Card>
   );
 }

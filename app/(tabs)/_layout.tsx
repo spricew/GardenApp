@@ -1,12 +1,16 @@
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { View, Text } from "react-native";
+import { getTodayISO, formatDateDisplay } from "../../utils/dates";
 
 export default function TabsLayout() {
+  const today = formatDateDisplay(getTodayISO());
+
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: "#fbfaf9", shadowColor: "transparent" },
+        headerStyle: { backgroundColor: "#f1f1f1", shadowColor: "transparent" },
         headerTintColor: "#343433",
+        headerTitleAlign: "center",
         headerTitleStyle: { fontFamily: "Family", fontSize: 23, fontWeight: "500", letterSpacing: -0.44 },
         tabBarActiveTintColor: "#121212",
         tabBarInactiveTintColor: "#a7a7a7",
@@ -29,7 +33,16 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Inicio",
-          headerTitle: "Hoy",
+          headerTitle: () => (
+            <View style={{ alignItems: "center", paddingTop: 15 }}>
+              <Text style={{ fontFamily: "Family", fontSize: 23, fontWeight: "500", color: "#343433", letterSpacing: -0.44, textAlign: "center" }}>
+                Hoy
+              </Text>
+              <Text style={{ fontFamily: "Inter", fontSize: 13, color: "#848281", marginTop: 2, textTransform: "capitalize", textAlign: "center" }}>
+                {today}
+              </Text>
+            </View>
+          ),
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🏠</Text>,
         }}
       />

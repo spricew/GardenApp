@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useServices, useServiceDates } from "../../hooks/useServices";
 import { ServiceCard } from "../../components/ServiceCard";
 import { CalendarDay } from "../../components/CalendarDay";
+import { Card } from "../../components/Card";
 import {
   getTodayISO,
   formatDateISO,
@@ -57,57 +58,62 @@ export default function CalendarScreen() {
 
   return (
     <ScrollView className="flex-1 bg-warm-canvas">
-      {/* Month Navigation */}
-      <View className="flex-row items-center justify-between px-6 pt-6 pb-4">
-        <Pressable onPress={goToPrevMonth} className="p-2 active:opacity-50">
-          <Text className="text-3xl font-light text-graphite">‹</Text>
-        </Pressable>
-        <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-[-0.44px] capitalize">
-          {getMonthName(currentMonth)} {currentYear}
-        </Text>
-        <Pressable onPress={goToNextMonth} className="p-2 active:opacity-50">
-          <Text className="text-3xl font-light text-graphite">›</Text>
-        </Pressable>
-      </View>
-
-      {/* Weekday Headers */}
-      <View className="flex-row px-4 mb-2">
-        {WEEKDAYS.map((day) => (
-          <View key={day} className="flex-1 items-center">
-            <Text className="font-sans text-[12px] font-semibold tracking-tight text-ash uppercase">
-              {day}
+      {/* Calendar Card */}
+      <View className="px-6 pt-6">
+        <Card>
+          {/* Month Navigation */}
+          <View className="flex-row items-center justify-between pb-4">
+            <Pressable onPress={goToPrevMonth} className="p-2 active:opacity-50">
+              <Text className="text-3xl font-light text-graphite">‹</Text>
+            </Pressable>
+            <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-[-0.44px] capitalize">
+              {getMonthName(currentMonth)} {currentYear}
             </Text>
+            <Pressable onPress={goToNextMonth} className="p-2 active:opacity-50">
+              <Text className="text-3xl font-light text-graphite">›</Text>
+            </Pressable>
           </View>
-        ))}
-      </View>
 
-      {/* Calendar Grid */}
-      <View className="flex-row flex-wrap px-4 mb-8">
-        {calendarDays.map((day, index) => (
-          <View key={index} className="w-[14.28%] py-1.5">
-            {day ? (
-              <CalendarDay
-                day={day}
-                isToday={
-                  formatDateISO(
-                    new Date(currentYear, currentMonth - 1, day)
-                  ) === today
-                }
-                isSelected={
-                  formatDateISO(
-                    new Date(currentYear, currentMonth - 1, day)
-                  ) === selectedDate
-                }
-                hasServices={serviceDates.includes(
-                  `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                )}
-                onPress={handleDayPress}
-              />
-            ) : (
-              <View className="w-10 h-10 mx-auto" />
-            )}
+          {/* Weekday Headers */}
+          <View className="flex-row mb-2">
+            {WEEKDAYS.map((day) => (
+              <View key={day} className="flex-1 items-center">
+                <Text className="font-sans text-[12px] font-semibold tracking-tight text-ash uppercase">
+                  {day}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
+
+          {/* Calendar Grid */}
+          <View className="flex-row flex-wrap mb-2">
+            {calendarDays.map((day, index) => (
+              <View key={index} className="w-[14.28%] py-1.5">
+                {day ? (
+                  <CalendarDay
+                    day={day}
+                    isToday={
+                      formatDateISO(
+                        new Date(currentYear, currentMonth - 1, day)
+                      ) === today
+                    }
+                    isSelected={
+                      formatDateISO(
+                        new Date(currentYear, currentMonth - 1, day)
+                      ) === selectedDate
+                    }
+                    hasServices={serviceDates.includes(
+                      `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                    )}
+                    onPress={handleDayPress}
+                  />
+                ) : (
+                  <View className="w-10 h-10 mx-auto" />
+                )}
+              </View>
+            ))}
+          </View>
+        </Card>
       </View>
 
       {/* Selected Day Services */}

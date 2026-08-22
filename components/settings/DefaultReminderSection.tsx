@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { REMINDER_OPTIONS } from "../../types";
-import { SettingsCard } from "./SettingsCard";
+import { Card } from "../Card";
 
 interface DefaultReminderSectionProps {
   defaultReminder: number;
@@ -9,7 +9,7 @@ interface DefaultReminderSectionProps {
 
 export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: DefaultReminderSectionProps) {
   return (
-    <SettingsCard title="⏰ Recordatorio Predeterminado" titleClassName="mb-2">
+    <Card title="⏰ Recordatorio Predeterminado" titleClassName="mb-2">
       <Text className="font-sans text-[13px] text-ash mb-4">
         Tiempo de aviso previo al crear nuevos servicios
       </Text>
@@ -19,7 +19,7 @@ export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: 
           <Pressable
             key={option.value}
             onPress={() => setDefaultReminder(option.value)}
-            className={`flex-row items-center justify-between px-4 py-3 rounded-xl border ${
+            className={`flex-row items-center justify-between px-4 py-3 rounded-lg border ${
               defaultReminder === option.value
                 ? "bg-stone-surface border-stone-surface"
                 : "bg-transparent border-transparent"
@@ -40,6 +40,6 @@ export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: 
           </Pressable>
         ))}
       </View>
-    </SettingsCard>
+    </Card>
   );
 }

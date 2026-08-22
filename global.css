@@ -32,7 +32,8 @@
     --text-caption: 12px;
     --text-body: 15px;
     --text-heading-sm: 19px;
-    --text-heading: 23px;
+    --text-heading: 26px;
+    --text-heading-lg: 32px;
     --text-display: 44px;
 
     /* Spacing */

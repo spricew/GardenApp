@@ -57,6 +57,7 @@ module.exports = {
         'body': 'var(--text-body)',
         'heading-sm': 'var(--text-heading-sm)',
         'heading': 'var(--text-heading)',
+        'heading-lg': 'var(--text-heading-lg)',
         'display': 'var(--text-display)',
       },
     },
