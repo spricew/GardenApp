@@ -19,7 +19,7 @@ export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: 
           <Pressable
             key={option.value}
             onPress={() => setDefaultReminder(option.value)}
-            className={`flex-row items-center justify-between px-4 py-3 rounded-lg border ${
+            className={`flex-row items-center justify-between px-4 py-3 rounded-xl border ${
               defaultReminder === option.value
                 ? "bg-stone-surface border-stone-surface"
                 : "bg-transparent border-transparent"
