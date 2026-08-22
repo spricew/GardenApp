@@ -31,29 +31,32 @@ export default function TodayScreen() {
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
       <View className="flex-1 bg-warm-canvas">
         {/* Filter chips */}
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={FILTER_OPTIONS}
-          keyExtractor={(item) => item.value}
-          contentContainerStyle={{ paddingHorizontal: 24, marginBottom: 16 }}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => setFilter(item.value)}
-              className={`mr-3 px-4 py-2 rounded-full border ${filter === item.value
-                  ? "bg-midnight border-midnight"
-                  : "bg-stone-surface border-transparent"
-                }`}
-            >
-              <Text
-                className={`font-sans font-medium text-[14px] tracking-tight ${filter === item.value ? "text-white" : "text-midnight"
+        <View className="pb-4">
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={FILTER_OPTIONS}
+            keyExtractor={(item) => item.value}
+            style={{ flexGrow: 0 }}
+            contentContainerStyle={{ paddingHorizontal: 24 }}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => setFilter(item.value)}
+                className={`mr-3 px-4 py-2 rounded-full border ${filter === item.value
+                    ? "bg-midnight border-midnight"
+                    : "bg-stone-surface border-transparent"
                   }`}
               >
-                {item.label}
-              </Text>
-            </Pressable>
-          )}
-        />
+                <Text
+                  className={`font-sans font-medium text-[14px] tracking-tight ${filter === item.value ? "text-white" : "text-midnight"
+                    }`}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            )}
+          />
+        </View>
 
         {/* Services List */}
         {loading ? (
@@ -61,7 +64,7 @@ export default function TodayScreen() {
             <ActivityIndicator size="large" color="#ff3e00" />
           </View>
         ) : filteredServices.length === 0 ? (
-          <View className="px-6 pt-6">
+          <View className="flex-1 px-6 pt-2">
             <Card className="items-center py-12">
               <Text className="text-6xl mb-6">🌱</Text>
               <Text className="font-sans text-[23px] font-medium text-charcoal-primary tracking-tight text-center">
@@ -74,7 +77,6 @@ export default function TodayScreen() {
               </Text>
             </Card>
           </View>
-
         ) : (
           <FlatList
             data={filteredServices}
