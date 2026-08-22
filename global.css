@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Colors */
-    --color-warm-canvas: #fbfaf9;
+    --color-warm-canvas: #f6f6f692;
     --color-stone-surface: #f2f0ed;
     --color-parchment-card: #f8f7f4;
     --color-graphite: #474645;
@@ -34,8 +34,7 @@
     --text-body: 15px;
     --text-heading-sm: 19px;
     --text-heading: 23px;
-    --text-heading-lg: 44px;
-    --text-display: 68px;
+    --text-display: 44px;
 
     /* Spacing */
     --spacing-4: 4px;
@@ -54,15 +53,5 @@
     --spacing-92: 92px;
     --spacing-96: 96px;
     --spacing-104: 104px;
-
-    /* Border Radius */
-    --radius-sm: 2px;
-    --radius-md: 6px;
-    --radius-lg: 10px;
-    --radius-2xl: 17px;
-    --radius-3xl: 24px;
-    --radius-3xl-2: 32px;
-    --radius-3xl-3: 40px;
-    --radius-full: 72px;
   }
 }

@@ -28,7 +28,6 @@ module.exports = {
         'violet-pop': 'var(--color-violet-pop)',
         'coral-red': 'var(--color-coral-red)',
         'valid-green': 'var(--color-valid-green)',
-        // backward compatibility for existing screens while refactoring
         garden: {
           50: '#FEFAE0',
           100: '#E9F5DB',
@@ -50,20 +49,17 @@ module.exports = {
           500: '#BC6C25',
         },
       },
-      borderRadius: {
-        'sm': 'var(--radius-sm)',
-        'md': 'var(--radius-md)',
-        'lg': 'var(--radius-lg)',
-        'xl': 'var(--radius-2xl)',
-        '2xl': 'var(--radius-3xl)',
-        '3xl': 'var(--radius-3xl-2)',
-        '4xl': 'var(--radius-3xl-3)',
-        'full': 'var(--radius-full)',
-      },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['Family', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-      }
+      },
+      fontSize: {
+        'caption': 'var(--text-caption)',
+        'body': 'var(--text-body)',
+        'heading-sm': 'var(--text-heading-sm)',
+        'heading': 'var(--text-heading)',
+        'display': 'var(--text-display)',
+      },
     },
   },
   plugins: [],
