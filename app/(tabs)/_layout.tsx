@@ -28,8 +28,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Hoy",
-          headerTitle: "Family",
+          title: "Inicio",
+          headerTitle: "Hoy",
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🏠</Text>,
         }}
       />
@@ -45,7 +45,7 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: "Ajustes",
-          headerTitle: "Ajustes",
+          headerShown: false,
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>⚙️</Text>,
         }}
       />
