@@ -5,12 +5,13 @@ interface CardProps extends ViewProps {
   title?: string;
   children: ReactNode;
   titleClassName?: string;
+  extraClassName?: string;
 }
 
-export function Card({ title, children, className = "bg-white", titleClassName = "mb-4", ...props }: CardProps) {
+export function Card({ title, children, extraClassName = "", titleClassName = "mb-4", ...props }: CardProps) {
   return (
     <View 
-      className={`rounded-[30px] p-6 mb-4 border border-stone-surface ${className}`}
+      className={`rounded-[30px] p-6 mb-4 border border-stone-surface bg-white ${extraClassName}`}
       {...props}
     >
       {title && (

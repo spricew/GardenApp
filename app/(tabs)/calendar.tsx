@@ -117,17 +117,17 @@ export default function CalendarScreen() {
       </View>
 
       {/* Selected Day Services */}
-      <View className="px-6 pb-12">
+      <View className="px-6 pb-12 pt-6">
         <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-tight mb-4">
           Servicios del {selectedDate.split("-")[2]}/{selectedDate.split("-")[1]}
         </Text>
         {services.length === 0 ? (
-          <View className="bg-white rounded-lg p-8 items-center justify-center border border-stone-surface">
+          <Card extraClassName="items-center justify-center py-20">
             <Text className="text-4xl mb-4">🌱</Text>
-            <Text className="font-sans text-[15px] font-medium text-graphite">
+            <Text className="font-sans text-heading-sm font-medium text-graphite">
               Sin servicios para este día
             </Text>
-          </View>
+          </Card>
         ) : (
           services.map((service) => (
             <ServiceCard key={service.id} service={service} />

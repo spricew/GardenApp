@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/StatusBadge";
 import { getTodayISO, formatDateDisplay } from "../../utils/dates";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ServiceStatus } from "../../types";
+import { Card } from "@/components/Card";
 
 const FILTER_OPTIONS: { label: string; value: ServiceStatus | "all" }[] = [
   { label: "Todos", value: "all" },
@@ -28,15 +29,14 @@ export default function TodayScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-
       <View className="flex-1 bg-warm-canvas">
         {/* Filter chips */}
         <FlatList
-          // horizontal
+          horizontal
           showsHorizontalScrollIndicator={false}
           data={FILTER_OPTIONS}
           keyExtractor={(item) => item.value}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 12, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 24, marginBottom: 16 }}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => setFilter(item.value)}
@@ -61,17 +61,20 @@ export default function TodayScreen() {
             <ActivityIndicator size="large" color="#ff3e00" />
           </View>
         ) : filteredServices.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-8 pb-32">
-            <Text className="text-6xl mb-6">🌱</Text>
-            <Text className="font-sans text-[23px] font-medium text-charcoal-primary tracking-tight text-center">
-              {filter === "all"
-                ? "No hay servicios agendados para hoy"
-                : "No hay servicios con ese estado"}
-            </Text>
-            <Text className="font-sans text-[15px] text-graphite text-center mt-4">
-              Presiona el botón + para agregar un servicio
-            </Text>
+          <View className="px-6 pt-6">
+            <Card className="items-center py-12">
+              <Text className="text-6xl mb-6">🌱</Text>
+              <Text className="font-sans text-[23px] font-medium text-charcoal-primary tracking-tight text-center">
+                {filter === "all"
+                  ? "No hay servicios agendados para hoy"
+                  : "No hay servicios con ese estado"}
+              </Text>
+              <Text className="font-sans text-[15px] text-graphite text-center mt-4">
+                Presiona el botón + para agregar un servicio
+              </Text>
+            </Card>
           </View>
+
         ) : (
           <FlatList
             data={filteredServices}
