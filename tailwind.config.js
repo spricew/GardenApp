@@ -7,7 +7,6 @@ module.exports = {
       colors: {
         'warm-canvas': 'var(--color-warm-canvas)',
         'stone-surface': 'var(--color-stone-surface)',
-        'parchment-card': 'var(--color-parchment-card)',
         'graphite': 'var(--color-graphite)',
         'charcoal-primary': 'var(--color-charcoal-primary)',
         'midnight': 'var(--color-midnight)',
