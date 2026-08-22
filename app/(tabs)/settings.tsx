@@ -6,13 +6,13 @@ import { DefaultReminderSection } from "../../components/settings/DefaultReminde
 import { AboutSection } from "../../components/settings/AboutSection";
 
 export default function SettingsScreen() {
-  const [defaultReminder, setDefaultReminder] = useState(30);
+  const [defaultReminder, setDefaultReminder] = useState(2880);
 
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
       <ScrollView className="flex-1 bg-warm-canvas">
-        <View className="px-6 pt-6 pb-12">
-          <Text className="font-display font-medium text-display text-charcoal-primary tracking-[-1.14px] leading-[1.09] mb-8">
+        <View className="px-6 pt-12">
+          <Text className="font-display font-medium text-display text-charcoal-primary tracking-[-1.14px] mb-8">
             Ajustes
           </Text>
 
