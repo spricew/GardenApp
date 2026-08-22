@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Colors */
+    --color-warm-canvas: #fbfaf9;
+    --color-stone-surface: #f2f0ed;
+    --color-parchment-card: #f8f7f4;
+    --color-graphite: #474645;
+    --color-charcoal-primary: #343433;
+    --color-midnight: #121212;
+    --color-obsidian: #000000;
+    --color-ash: #848281;
+    --color-fog: #c6c6c6;
+    --color-smoke: #a7a7a7;
+    --color-pepper: #282624;
+    --color-ember-orange: #ff3e00;
+    --color-meadow-green: #00ca48;
+    --color-sky-blue: #0090ff;
+    --color-sunburst-yellow: #ffbb26;
+    --color-deep-amber: #d48f00;
+    --color-ocean-blue: #0086fc;
+    --color-ice-blue: #64c6ff;
+    --color-spearmint: #00c978;
+    --color-flamingo: #ff58ae;
+    --color-violet-pop: #9f4fff;
+    --color-coral-red: #ff2b3a;
+    --color-valid-green: #00c454;
+    
+    /* Typography — Scale */
+    --text-caption: 12px;
+    --text-body: 15px;
+    --text-heading-sm: 19px;
+    --text-heading: 23px;
+    --text-heading-lg: 44px;
+    --text-display: 68px;
+
+    /* Spacing */
+    --spacing-4: 4px;
+    --spacing-8: 8px;
+    --spacing-12: 12px;
+    --spacing-16: 16px;
+    --spacing-20: 20px;
+    --spacing-24: 24px;
+    --spacing-28: 28px;
+    --spacing-32: 32px;
+    --spacing-36: 36px;
+    --spacing-48: 48px;
+    --spacing-60: 60px;
+    --spacing-76: 76px;
+    --spacing-80: 80px;
+    --spacing-92: 92px;
+    --spacing-96: 96px;
+    --spacing-104: 104px;
+
+    /* Border Radius */
+    --radius-sm: 2px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-2xl: 17px;
+    --radius-3xl: 24px;
+    --radius-3xl-2: 32px;
+    --radius-3xl-3: 40px;
+    --radius-full: 72px;
+  }
+}

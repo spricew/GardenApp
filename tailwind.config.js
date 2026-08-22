@@ -1,0 +1,70 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {
+      colors: {
+        'warm-canvas': 'var(--color-warm-canvas)',
+        'stone-surface': 'var(--color-stone-surface)',
+        'parchment-card': 'var(--color-parchment-card)',
+        'graphite': 'var(--color-graphite)',
+        'charcoal-primary': 'var(--color-charcoal-primary)',
+        'midnight': 'var(--color-midnight)',
+        'obsidian': 'var(--color-obsidian)',
+        'ash': 'var(--color-ash)',
+        'fog': 'var(--color-fog)',
+        'smoke': 'var(--color-smoke)',
+        'pepper': 'var(--color-pepper)',
+        'ember-orange': 'var(--color-ember-orange)',
+        'meadow-green': 'var(--color-meadow-green)',
+        'sky-blue': 'var(--color-sky-blue)',
+        'sunburst-yellow': 'var(--color-sunburst-yellow)',
+        'deep-amber': 'var(--color-deep-amber)',
+        'ocean-blue': 'var(--color-ocean-blue)',
+        'ice-blue': 'var(--color-ice-blue)',
+        'spearmint': 'var(--color-spearmint)',
+        'flamingo': 'var(--color-flamingo)',
+        'violet-pop': 'var(--color-violet-pop)',
+        'coral-red': 'var(--color-coral-red)',
+        'valid-green': 'var(--color-valid-green)',
+        // backward compatibility for existing screens while refactoring
+        garden: {
+          50: '#FEFAE0',
+          100: '#E9F5DB',
+          200: '#B7E4C7',
+          300: '#95D5B2',
+          400: '#74C69D',
+          500: '#52B788',
+          600: '#40916C',
+          700: '#2D6A4F',
+          800: '#1B4332',
+          900: '#081C15',
+        },
+        cream: {
+          50: '#FEFAE0',
+          100: '#FEFCE8',
+        },
+        accent: {
+          400: '#DDA15E',
+          500: '#BC6C25',
+        },
+      },
+      borderRadius: {
+        'sm': 'var(--radius-sm)',
+        'md': 'var(--radius-md)',
+        'lg': 'var(--radius-lg)',
+        'xl': 'var(--radius-2xl)',
+        '2xl': 'var(--radius-3xl)',
+        '3xl': 'var(--radius-3xl-2)',
+        '4xl': 'var(--radius-3xl-3)',
+        'full': 'var(--radius-full)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Family', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      }
+    },
+  },
+  plugins: [],
+};
