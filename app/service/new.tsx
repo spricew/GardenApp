@@ -20,6 +20,7 @@ import type { ServiceFormData } from "../../types";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewServiceScreen() {
   const router = useRouter();
@@ -112,145 +113,147 @@ export default function NewServiceScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-warm-canvas">
-      <View className="px-6 pt-6 pb-12">
-        {/* Header */}
-        <View className="flex-row items-center mb-8">
-          <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
-            <Text className="text-[28px] font-light text-graphite leading-none">←</Text>
+    <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
+      <ScrollView className="flex-1 bg-warm-canvas">
+        <View className="px-6 pt-6 pb-12">
+          {/* Header */}
+          <View className="flex-row items-center mb-8">
+            <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
+              <Text className="text-[28px] font-light text-graphite leading-none">←</Text>
+            </Pressable>
+            <Text className="font-display font-medium text-[44px] text-charcoal-primary tracking-[-1.14px] leading-[1.09]">
+              Nuevo
+            </Text>
+          </View>
+
+          {/* Client Name */}
+          <View className="mb-5">
+            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+              👤 Cliente *
+            </Text>
+            <TextInput
+              value={clientName}
+              onChangeText={setClientName}
+              placeholder="Nombre del cliente"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              placeholderTextColor="#a7a7a7"
+            />
+          </View>
+
+          {/* Address */}
+          <View className="mb-5">
+            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+              📍 Dirección
+            </Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Dirección del servicio"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              placeholderTextColor="#a7a7a7"
+            />
+          </View>
+
+          {/* Description */}
+          <View className="mb-5">
+            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+              📝 Descripción
+            </Text>
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Tipo de servicio (poda, riego, limpieza...)"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              placeholderTextColor="#a7a7a7"
+            />
+          </View>
+
+          {/* Date & Time */}
+          <View className="flex-row gap-4 mb-5">
+            <View className="flex-1">
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+                📅 Fecha
+              </Text>
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                className="bg-white border border-stone-surface rounded-lg px-4 py-3"
+              >
+                <Text className="font-sans text-[15px] text-graphite">
+                  {formatDateForDisplay(scheduledDate)}
+                </Text>
+              </Pressable>
+            </View>
+            <View className="flex-1">
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+                🕐 Hora
+              </Text>
+              <Pressable
+                onPress={() => setShowTimePicker(true)}
+                className="bg-white border border-stone-surface rounded-lg px-4 py-3"
+              >
+                <Text className="font-sans text-[15px] text-graphite">
+                  {formatTimeForDisplay(scheduledTime)}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={scheduledDate}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              minimumDate={new Date()}
+            />
+          )}
+
+          {showTimePicker && (
+            <DateTimePicker
+              value={scheduledTime}
+              mode="time"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onTimeChange}
+              is24Hour={false}
+            />
+          )}
+
+          {/* Notes */}
+          <View className="mb-5">
+            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
+              📋 Notas
+            </Text>
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Notas adicionales..."
+              multiline
+              numberOfLines={3}
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px]"
+              placeholderTextColor="#a7a7a7"
+              textAlignVertical="top"
+            />
+          </View>
+
+          {/* Reminder */}
+          <View className="mb-8">
+            <ReminderPicker value={reminderMinutes} onChange={setReminderMinutes} />
+          </View>
+
+          {/* Save Button */}
+          <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            className={`rounded-full py-4 items-center ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
+              }`}
+          >
+            <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
+              {saving ? "Guardando..." : "✅ Guardar Servicio"}
+            </Text>
           </Pressable>
-          <Text className="font-display font-medium text-[44px] text-charcoal-primary tracking-[-1.14px] leading-[1.09]">
-            Nuevo
-          </Text>
         </View>
+      </ScrollView>
+    </SafeAreaView>
 
-        {/* Client Name */}
-        <View className="mb-5">
-          <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-            👤 Cliente *
-          </Text>
-          <TextInput
-            value={clientName}
-            onChangeText={setClientName}
-            placeholder="Nombre del cliente"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
-            placeholderTextColor="#a7a7a7"
-          />
-        </View>
-
-        {/* Address */}
-        <View className="mb-5">
-          <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-            📍 Dirección
-          </Text>
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            placeholder="Dirección del servicio"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
-            placeholderTextColor="#a7a7a7"
-          />
-        </View>
-
-        {/* Description */}
-        <View className="mb-5">
-          <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-            📝 Descripción
-          </Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Tipo de servicio (poda, riego, limpieza...)"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
-            placeholderTextColor="#a7a7a7"
-          />
-        </View>
-
-        {/* Date & Time */}
-        <View className="flex-row gap-4 mb-5">
-          <View className="flex-1">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              📅 Fecha
-            </Text>
-            <Pressable
-              onPress={() => setShowDatePicker(true)}
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3"
-            >
-              <Text className="font-sans text-[15px] text-graphite">
-                {formatDateForDisplay(scheduledDate)}
-              </Text>
-            </Pressable>
-          </View>
-          <View className="flex-1">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              🕐 Hora
-            </Text>
-            <Pressable
-              onPress={() => setShowTimePicker(true)}
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3"
-            >
-              <Text className="font-sans text-[15px] text-graphite">
-                {formatTimeForDisplay(scheduledTime)}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={scheduledDate}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={onDateChange}
-            minimumDate={new Date()}
-          />
-        )}
-
-        {showTimePicker && (
-          <DateTimePicker
-            value={scheduledTime}
-            mode="time"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={onTimeChange}
-            is24Hour={false}
-          />
-        )}
-
-        {/* Notes */}
-        <View className="mb-5">
-          <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-            📋 Notas
-          </Text>
-          <TextInput
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Notas adicionales..."
-            multiline
-            numberOfLines={3}
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px]"
-            placeholderTextColor="#a7a7a7"
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* Reminder */}
-        <View className="mb-8">
-          <ReminderPicker value={reminderMinutes} onChange={setReminderMinutes} />
-        </View>
-
-        {/* Save Button */}
-        <Pressable
-          onPress={handleSave}
-          disabled={saving}
-          className={`rounded-full py-4 items-center ${
-            saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
-          }`}
-        >
-          <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
-            {saving ? "Guardando..." : "✅ Guardar Servicio"}
-          </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
   );
 }
