@@ -30,7 +30,7 @@ export default function NewServiceScreen() {
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
-  const [reminderMinutes, setReminderMinutes] = useState(30);
+  const [reminderMinutes, setReminderMinutes] = useState(2880);
   const [saving, setSaving] = useState(false);
 
   // Date/time state
