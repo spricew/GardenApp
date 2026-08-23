@@ -117,8 +117,8 @@ export default function CalendarScreen() {
       </View>
 
       {/* Selected Day Services */}
-      <View className="px-6 pb-12 pt-6">
-        <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-tight mb-4">
+      <View className="px-6 pb-12 pt-8 gap-3">
+        <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-tight mb-2 pl-2">
           Servicios del {selectedDate.split("-")[2]}/{selectedDate.split("-")[1]}
         </Text>
         {services.length === 0 ? (

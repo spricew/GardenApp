@@ -81,7 +81,7 @@ export default function TodayScreen() {
           <FlatList
             data={filteredServices}
             keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, gap: 6 }}
             renderItem={({ item }) => <ServiceCard service={item} />}
           />
         )}

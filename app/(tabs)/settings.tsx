@@ -11,8 +11,8 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
       <ScrollView className="flex-1 bg-warm-canvas">
-        <View className="px-6 pt-12">
-          <Text className="font-display font-medium text-display text-charcoal-primary tracking-[-1.14px] mb-8">
+        <View className="px-6 pt-12 gap-3">
+          <Text className="font-display font-medium text-display text-charcoal-primary tracking-[-1.14px] pl-2 mb-4">
             Ajustes
           </Text>
 
