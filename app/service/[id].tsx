@@ -119,7 +119,11 @@ export default function ServiceDetailScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-warm-canvas">
         <Text className="font-sans text-[15px] text-graphite mb-4">Servicio no encontrado</Text>
-        <Pressable onPress={() => router.back()} className="px-4 py-2 bg-stone-surface rounded-full">
+        <Pressable 
+          onPress={() => router.back()} 
+          className="px-4 py-2 bg-stone-surface rounded-full border-continuous"
+          style={{ borderCurve: 'continuous' }}
+        >
           <Text className="font-sans font-medium text-[14px] text-charcoal-primary">Volver</Text>
         </Pressable>
       </View>
@@ -131,7 +135,7 @@ export default function ServiceDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
       <ScrollView className="flex-1 bg-warm-canvas">
-        <View className="px-6 pt-6 pb-12">
+        <View className="px-6 pt-6 pb-12 gap-3 ">
           {/* Header */}
           <View className="flex-row items-center mb-8">
             <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
@@ -212,7 +216,8 @@ export default function ServiceDetailScreen() {
                     <Pressable
                       key={status}
                       onPress={() => handleStatusChange(status)}
-                      className={`flex-row items-center px-4 py-3 rounded-lg border border-transparent ${config.bgColor} active:opacity-80`}
+                      className={`flex-row items-center px-4 py-3 rounded-lg border border-transparent border-continuous ${config.bgColor} active:opacity-80`}
+                      style={{ borderCurve: 'continuous' }}
                     >
                       <Text className="mr-3 text-[19px]">{config.icon}</Text>
                       <Text className={`font-sans text-[15px] font-medium tracking-tight ${config.color}`}>
@@ -228,7 +233,8 @@ export default function ServiceDetailScreen() {
           {/* Delete */}
           <Pressable
             onPress={handleDelete}
-            className="bg-coral-red/10 rounded-full py-4 items-center active:opacity-80 mt-2"
+            className="bg-coral-red/10 rounded-full py-4 items-center border-continuous active:opacity-80 mt-2"
+            style={{ borderCurve: 'continuous' }}
           >
             <Text className="text-coral-red font-sans font-medium text-[15px] tracking-tight">
               🗑️ Eliminar Servicio
