@@ -62,5 +62,16 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    ({ addUtilities }) => {
+      addUtilities({
+        '.border-continuous': {
+          borderCurve: 'continuous',
+        },
+        '.squircle': {
+          borderCurve: 'continuous',
+        },
+      });
+    },
+  ],
 };

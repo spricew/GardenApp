@@ -42,10 +42,11 @@ export default function TodayScreen() {
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => setFilter(item.value)}
-                className={`mr-3 px-4 py-2 rounded-full border ${filter === item.value
-                    ? "bg-midnight border-midnight"
-                    : "bg-stone-surface border-transparent"
+                className={`mr-3 px-4 py-2 rounded-full overflow-hidden ${filter === item.value
+                    ? "bg-midnight"
+                    : "bg-stone-surface"
                   }`}
+                style={{ borderCurve: 'continuous' }}
               >
                 <Text
                   className={`font-sans font-medium text-[14px] tracking-tight ${filter === item.value ? "text-white" : "text-midnight"
@@ -89,7 +90,8 @@ export default function TodayScreen() {
         {/* FAB */}
         <Pressable
           onPress={() => router.push("/service/new")}
-          className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-midnight items-center justify-center shadow-lg active:bg-charcoal-primary"
+          className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-midnight items-center justify-center shadow-lg overflow-hidden active:bg-charcoal-primary"
+          style={{ borderCurve: 'continuous' }}
         >
           <Text className="text-white text-3xl font-light leading-none">+</Text>
         </Pressable>

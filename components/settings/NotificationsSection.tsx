@@ -28,7 +28,10 @@ export function NotificationsSection() {
           </Text>
         </View>
         {hasPermission ? (
-          <View className="bg-valid-green/10 px-4 py-1.5 rounded-full">
+          <View 
+            className="bg-valid-green/10 px-4 py-1.5 rounded-full overflow-hidden"
+            style={{ borderCurve: 'continuous' }}
+          >
             <Text className="text-valid-green text-[14px] font-sans font-semibold">
               ✅ Activos
             </Text>
@@ -36,7 +39,8 @@ export function NotificationsSection() {
         ) : (
           <Pressable
             onPress={handleRequestPermission}
-            className="bg-midnight px-5 py-2 rounded-full active:opacity-80"
+            className="bg-midnight px-5 py-2 rounded-full overflow-hidden active:opacity-80"
+            style={{ borderCurve: 'continuous' }}
           >
             <Text className="text-white text-[14px] font-sans font-medium tracking-tight">Activar</Text>
           </Pressable>

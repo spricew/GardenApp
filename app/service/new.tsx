@@ -135,7 +135,8 @@ export default function NewServiceScreen() {
               value={clientName}
               onChangeText={setClientName}
               placeholder="Nombre del cliente"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+              style={{ borderCurve: 'continuous' }}
               placeholderTextColor="#a7a7a7"
             />
           </View>
@@ -149,7 +150,8 @@ export default function NewServiceScreen() {
               value={address}
               onChangeText={setAddress}
               placeholder="Dirección del servicio"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+              style={{ borderCurve: 'continuous' }}
               placeholderTextColor="#a7a7a7"
             />
           </View>
@@ -163,7 +165,8 @@ export default function NewServiceScreen() {
               value={description}
               onChangeText={setDescription}
               placeholder="Tipo de servicio (poda, riego, limpieza...)"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+              style={{ borderCurve: 'continuous' }}
               placeholderTextColor="#a7a7a7"
             />
           </View>
@@ -176,7 +179,8 @@ export default function NewServiceScreen() {
               </Text>
               <Pressable
                 onPress={() => setShowDatePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3"
+                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
+                style={{ borderCurve: 'continuous' }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
                   {formatDateForDisplay(scheduledDate)}
@@ -189,7 +193,8 @@ export default function NewServiceScreen() {
               </Text>
               <Pressable
                 onPress={() => setShowTimePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3"
+                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
+                style={{ borderCurve: 'continuous' }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
                   {formatTimeForDisplay(scheduledTime)}
@@ -229,7 +234,8 @@ export default function NewServiceScreen() {
               placeholder="Notas adicionales..."
               multiline
               numberOfLines={3}
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px]"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px] overflow-hidden"
+              style={{ borderCurve: 'continuous' }}
               placeholderTextColor="#a7a7a7"
               textAlignVertical="top"
             />
@@ -244,8 +250,9 @@ export default function NewServiceScreen() {
           <Pressable
             onPress={handleSave}
             disabled={saving}
-            className={`rounded-full py-4 items-center ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
+            className={`rounded-full py-4 items-center overflow-hidden ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
               }`}
+            style={{ borderCurve: 'continuous' }}
           >
             <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
               {saving ? "Guardando..." : "✅ Guardar Servicio"}

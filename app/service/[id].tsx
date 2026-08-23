@@ -121,7 +121,7 @@ export default function ServiceDetailScreen() {
         <Text className="font-sans text-[15px] text-graphite mb-4">Servicio no encontrado</Text>
         <Pressable 
           onPress={() => router.back()} 
-          className="px-4 py-2 bg-stone-surface rounded-full border-continuous"
+          className="px-4 py-2 bg-stone-surface rounded-full overflow-hidden"
           style={{ borderCurve: 'continuous' }}
         >
           <Text className="font-sans font-medium text-[14px] text-charcoal-primary">Volver</Text>
@@ -216,7 +216,7 @@ export default function ServiceDetailScreen() {
                     <Pressable
                       key={status}
                       onPress={() => handleStatusChange(status)}
-                      className={`flex-row items-center px-4 py-3 rounded-lg border border-transparent border-continuous ${config.bgColor} active:opacity-80`}
+                      className={`flex-row items-center px-4 py-3 rounded-lg overflow-hidden ${config.bgColor} active:opacity-80`}
                       style={{ borderCurve: 'continuous' }}
                     >
                       <Text className="mr-3 text-[19px]">{config.icon}</Text>
@@ -233,7 +233,7 @@ export default function ServiceDetailScreen() {
           {/* Delete */}
           <Pressable
             onPress={handleDelete}
-            className="bg-coral-red/10 rounded-full py-4 items-center border-continuous active:opacity-80 mt-2"
+            className="bg-coral-red/10 rounded-full py-4 items-center overflow-hidden active:opacity-80 mt-2"
             style={{ borderCurve: 'continuous' }}
           >
             <Text className="text-coral-red font-sans font-medium text-[15px] tracking-tight">

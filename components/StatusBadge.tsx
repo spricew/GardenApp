@@ -12,7 +12,10 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const textSize = size === 'sm' ? 'text-[12px]' : 'text-[13px]';
 
   return (
-    <View className={`rounded-md flex-row items-center ${config.bgColor} ${sizeClasses}`}>
+    <View 
+      className={`rounded-md flex-row items-center overflow-hidden ${config.bgColor} ${sizeClasses}`}
+      style={{ borderCurve: 'continuous' }}
+    >
       <Text className={`mr-1 text-[12px]`}>{config.icon}</Text>
       <Text className={`font-sans font-medium ${config.color} ${textSize}`}>{config.label}</Text>
     </View>

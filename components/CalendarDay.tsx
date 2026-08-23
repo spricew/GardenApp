@@ -23,7 +23,8 @@ export function CalendarDay({ day, isToday, isSelected, hasServices, onPress }: 
   return (
     <Pressable
       onPress={() => onPress(day)}
-      className={`w-10 h-10 rounded-full items-center justify-center mx-auto ${bgClass} active:scale-95`}
+      className={`w-10 h-10 rounded-full items-center justify-center mx-auto overflow-hidden ${bgClass} active:scale-95`}
+      style={{ borderCurve: 'continuous' }}
     >
       <Text className={`font-sans text-[15px] tracking-tight ${textClass}`}>{day}</Text>
       {hasServices && (
@@ -31,6 +32,7 @@ export function CalendarDay({ day, isToday, isSelected, hasServices, onPress }: 
           className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${
             isSelected ? 'bg-white' : 'bg-ember-orange'
           }`}
+          style={{ borderCurve: 'continuous' }}
         />
       )}
     </Pressable>
