@@ -1,6 +1,7 @@
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { IconInbox, IconPlus } from '@tabler/icons-react-native';
 import { useServices } from "../../hooks/useServices";
 import { ServiceCard } from "../../components/ServiceCard";
 import { StatusBadge } from "../../components/StatusBadge";
@@ -67,13 +68,15 @@ export default function TodayScreen() {
         ) : filteredServices.length === 0 ? (
           <View className="flex-1 px-6 pt-2">
             <Card className="items-center py-12">
-              <Text className="text-6xl mb-6">🌱</Text>
-              <Text className="font-sans text-[23px] font-medium text-charcoal-primary tracking-tight text-center">
+              <View className="w-16 h-16 rounded-full bg-stone-surface items-center justify-center mb-5" style={{ borderCurve: 'continuous' }}>
+                <IconInbox size={28} color="#848281" strokeWidth={1.8} />
+              </View>
+              <Text className="font-sans text-[20px] font-semibold text-charcoal-primary tracking-tight text-center">
                 {filter === "all"
                   ? "No hay servicios agendados para hoy"
                   : "No hay servicios con ese estado"}
               </Text>
-              <Text className="font-sans text-[15px] text-graphite text-center mt-4">
+              <Text className="font-sans text-[14px] text-ash text-center mt-2">
                 Presiona el botón + para agregar un servicio
               </Text>
             </Card>
@@ -90,10 +93,10 @@ export default function TodayScreen() {
         {/* FAB */}
         <Pressable
           onPress={() => router.push("/service/new")}
-          className="absolute bottom-8 right-8 w-16 h-16 rounded-full bg-midnight items-center justify-center shadow-lg overflow-hidden active:bg-charcoal-primary"
+          className="absolute bottom-8 right-8 w-14 h-14 rounded-full bg-midnight items-center justify-center shadow-lg overflow-hidden active:bg-charcoal-primary"
           style={{ borderCurve: 'continuous' }}
         >
-          <Text className="text-white text-3xl font-light leading-none">+</Text>
+          <IconPlus size={24} color="#ffffff" strokeWidth={2.2} />
         </Pressable>
       </View>
     </SafeAreaView>

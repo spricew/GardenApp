@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import { View, Text } from "react-native";
+import { IconHome, IconCalendar, IconSettings } from '@tabler/icons-react-native';
 import { getTodayISO, formatDateDisplay } from "../../utils/dates";
 
 export default function TabsLayout() {
@@ -43,7 +44,7 @@ export default function TabsLayout() {
               </Text>
             </View>
           ),
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🏠</Text>,
+          tabBarIcon: ({ color, size }) => <IconHome size={size || 20} color={color} strokeWidth={2} />,
         }}
       />
       <Tabs.Screen
@@ -51,7 +52,7 @@ export default function TabsLayout() {
         options={{
           title: "Calendario",
           headerTitle: "Calendario",
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>📅</Text>,
+          tabBarIcon: ({ color, size }) => <IconCalendar size={size || 20} color={color} strokeWidth={2} />,
         }}
       />
       <Tabs.Screen
@@ -59,7 +60,7 @@ export default function TabsLayout() {
         options={{
           title: "Ajustes",
           headerShown: false,
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>⚙️</Text>,
+          tabBarIcon: ({ color, size }) => <IconSettings size={size || 20} color={color} strokeWidth={2} />,
         }}
       />
     </Tabs>

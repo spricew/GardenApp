@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { IconArrowLeft, IconUser, IconMapPin, IconAlignLeft, IconCalendar, IconClock, IconFileText, IconCheck } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 import { ReminderPicker } from "../../components/ReminderPicker";
 import { createService } from "../../database/services";
@@ -118,19 +119,22 @@ export default function NewServiceScreen() {
         <View className="px-6 pt-6 pb-12">
           {/* Header */}
           <View className="flex-row items-center mb-8">
-            <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
-              <Text className="text-[28px] font-light text-graphite leading-none">←</Text>
+            <Pressable onPress={() => router.back()} className="mr-4 p-2 rounded-full active:bg-stone-surface">
+              <IconArrowLeft size={22} color="#474645" strokeWidth={2} />
             </Pressable>
             <Text className="font-display font-medium text-heading-lg text-charcoal-primary tracking-[-1.14px]">
-              Nuevo
+              Nuevo servicio
             </Text>
           </View>
 
           {/* Client Name */}
           <View className="mb-5">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              👤 Cliente *
-            </Text>
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <IconUser size={14} color="#343433" strokeWidth={2} />
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                Cliente *
+              </Text>
+            </View>
             <TextInput
               value={clientName}
               onChangeText={setClientName}
@@ -143,9 +147,12 @@ export default function NewServiceScreen() {
 
           {/* Address */}
           <View className="mb-5">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              📍 Dirección
-            </Text>
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <IconMapPin size={14} color="#343433" strokeWidth={2} />
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                Dirección
+              </Text>
+            </View>
             <TextInput
               value={address}
               onChangeText={setAddress}
@@ -158,9 +165,12 @@ export default function NewServiceScreen() {
 
           {/* Description */}
           <View className="mb-5">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              📝 Descripción
-            </Text>
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                Descripción
+              </Text>
+            </View>
             <TextInput
               value={description}
               onChangeText={setDescription}
@@ -174,9 +184,12 @@ export default function NewServiceScreen() {
           {/* Date & Time */}
           <View className="flex-row gap-4 mb-5">
             <View className="flex-1">
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-                📅 Fecha
-              </Text>
+              <View className="flex-row items-center gap-1.5 mb-2">
+                <IconCalendar size={14} color="#343433" strokeWidth={2} />
+                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                  Fecha
+                </Text>
+              </View>
               <Pressable
                 onPress={() => setShowDatePicker(true)}
                 className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
@@ -188,9 +201,12 @@ export default function NewServiceScreen() {
               </Pressable>
             </View>
             <View className="flex-1">
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-                🕐 Hora
-              </Text>
+              <View className="flex-row items-center gap-1.5 mb-2">
+                <IconClock size={14} color="#343433" strokeWidth={2} />
+                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                  Hora
+                </Text>
+              </View>
               <Pressable
                 onPress={() => setShowTimePicker(true)}
                 className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
@@ -225,9 +241,12 @@ export default function NewServiceScreen() {
 
           {/* Notes */}
           <View className="mb-5">
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">
-              📋 Notas
-            </Text>
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <IconFileText size={14} color="#343433" strokeWidth={2} />
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                Notas
+              </Text>
+            </View>
             <TextInput
               value={notes}
               onChangeText={setNotes}
@@ -250,17 +269,18 @@ export default function NewServiceScreen() {
           <Pressable
             onPress={handleSave}
             disabled={saving}
-            className={`rounded-full py-4 items-center overflow-hidden ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
-              }`}
+            className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${
+              saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
+            }`}
             style={{ borderCurve: 'continuous' }}
           >
+            {!saving && <IconCheck size={18} color="#ffffff" strokeWidth={2.5} />}
             <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
-              {saving ? "Guardando..." : "✅ Guardar Servicio"}
+              {saving ? "Guardando..." : "Guardar Servicio"}
             </Text>
           </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
-
   );
 }

@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from "react-native";
+import { IconBell, IconCheck } from '@tabler/icons-react-native';
 import { REMINDER_OPTIONS } from "../../types";
 import { Card } from "../Card";
 
@@ -9,7 +10,13 @@ interface DefaultReminderSectionProps {
 
 export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: DefaultReminderSectionProps) {
   return (
-    <Card title="⏰ Recordatorio Predeterminado" titleClassName="mb-2">
+    <Card>
+      <View className="flex-row items-center gap-2 mb-1">
+        <IconBell size={16} color="#343433" strokeWidth={2} />
+        <Text className="font-sans font-semibold text-[17px] text-charcoal-primary tracking-tight">
+          Recordatorio Predeterminado
+        </Text>
+      </View>
       <Text className="font-sans text-[13px] text-ash mb-4">
         Tiempo de aviso previo al crear nuevos servicios
       </Text>
@@ -36,7 +43,7 @@ export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: 
               {option.label}
             </Text>
             {defaultReminder === option.value && (
-              <Text className="text-midnight text-[16px]">✓</Text>
+              <IconCheck size={16} color="#121212" strokeWidth={2.5} />
             )}
           </Pressable>
         ))}

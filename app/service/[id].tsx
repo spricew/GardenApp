@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
+import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, Icon } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 import { StatusBadge } from "../../components/StatusBadge";
 import { Card } from "../../components/Card";
@@ -25,6 +26,14 @@ import { formatDateDisplay, formatTimeDisplay } from "../../utils/dates";
 import type { Service, ServiceStatus } from "../../types";
 import { STATUS_CONFIG } from "../../types";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const STATUS_ICONS = {
+  IconClock,
+  IconRefresh,
+  IconPlayerPause,
+  IconCircleCheck,
+  IconCircleX,
+};
 
 const STATUS_TRANSITIONS: Record<ServiceStatus, ServiceStatus[]> = {
   pending: ["in_progress", "postponed", "not_done"],
@@ -135,11 +144,11 @@ export default function ServiceDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
       <ScrollView className="flex-1 bg-warm-canvas">
-        <View className="px-6 pt-6 pb-12 gap-3 ">
+        <View className="px-6 pt-6 pb-12 gap-3">
           {/* Header */}
           <View className="flex-row items-center mb-8">
-            <Pressable onPress={() => router.back()} className="mr-4 p-1 active:opacity-50">
-              <Text className="text-[28px] font-light text-graphite leading-none">←</Text>
+            <Pressable onPress={() => router.back()} className="mr-4 p-2 rounded-full active:bg-stone-surface">
+              <IconArrowLeft size={22} color="#474645" strokeWidth={2} />
             </Pressable>
             <Text className="font-display font-medium text-heading-lg text-charcoal-primary flex-1 tracking-[-1.14px]" numberOfLines={1}>
               {service.client_name}
@@ -156,23 +165,32 @@ export default function ServiceDetailScreen() {
           {/* Details */}
           <Card title="Detalles">
             <View className="gap-4">
-              <View className="flex-row">
-                <Text className="font-sans text-[15px] text-ash w-28">📅 Fecha</Text>
+              <View className="flex-row items-center">
+                <View className="flex-row items-center gap-1.5 w-28">
+                  <IconCalendar size={14} color="#848281" strokeWidth={2} />
+                  <Text className="font-sans text-[14px] text-ash">Fecha</Text>
+                </View>
                 <Text className="font-sans text-[15px] text-graphite flex-1 font-medium capitalize">
                   {formatDateDisplay(service.scheduled_date)}
                 </Text>
               </View>
 
-              <View className="flex-row">
-                <Text className="font-sans text-[15px] text-ash w-28">🕐 Hora</Text>
+              <View className="flex-row items-center">
+                <View className="flex-row items-center gap-1.5 w-28">
+                  <IconClock size={14} color="#848281" strokeWidth={2} />
+                  <Text className="font-sans text-[14px] text-ash">Hora</Text>
+                </View>
                 <Text className="font-sans text-[15px] text-graphite flex-1 font-medium">
                   {formatTimeDisplay(service.scheduled_time)}
                 </Text>
               </View>
 
               {service.address ? (
-                <View className="flex-row">
-                  <Text className="font-sans text-[15px] text-ash w-28">📍 Dirección</Text>
+                <View className="flex-row items-center">
+                  <View className="flex-row items-center gap-1.5 w-28">
+                    <IconMapPin size={14} color="#848281" strokeWidth={2} />
+                    <Text className="font-sans text-[14px] text-ash">Dirección</Text>
+                  </View>
                   <Text className="font-sans text-[15px] text-graphite flex-1">
                     {service.address}
                   </Text>
@@ -180,16 +198,22 @@ export default function ServiceDetailScreen() {
               ) : null}
 
               {service.description ? (
-                <View className="flex-row">
-                  <Text className="font-sans text-[15px] text-ash w-28">📝 Servicio</Text>
+                <View className="flex-row items-center">
+                  <View className="flex-row items-center gap-1.5 w-28">
+                    <IconAlignLeft size={14} color="#848281" strokeWidth={2} />
+                    <Text className="font-sans text-[14px] text-ash">Servicio</Text>
+                  </View>
                   <Text className="font-sans text-[15px] text-graphite flex-1">
                     {service.description}
                   </Text>
                 </View>
               ) : null}
 
-              <View className="flex-row">
-                <Text className="font-sans text-[15px] text-ash w-28">⏰ Aviso</Text>
+              <View className="flex-row items-center">
+                <View className="flex-row items-center gap-1.5 w-28">
+                  <IconBell size={14} color="#848281" strokeWidth={2} />
+                  <Text className="font-sans text-[14px] text-ash">Aviso</Text>
+                </View>
                 <Text className="font-sans text-[15px] text-graphite flex-1">
                   {timeTransform} día(s) antes
                 </Text>
@@ -199,7 +223,13 @@ export default function ServiceDetailScreen() {
 
           {/* Notes */}
           {service.notes ? (
-            <Card title="📋 Notas">
+            <Card>
+              <View className="flex-row items-center gap-2 mb-3">
+                <IconFileText size={16} color="#343433" strokeWidth={2} />
+                <Text className="font-sans font-semibold text-[17px] text-charcoal-primary tracking-tight">
+                  Notas
+                </Text>
+              </View>
               <Text className="font-sans text-[15px] text-graphite leading-[1.47]">
                 {service.notes}
               </Text>
@@ -212,14 +242,15 @@ export default function ServiceDetailScreen() {
               <View className="gap-3">
                 {availableTransitions.map((status) => {
                   const config = STATUS_CONFIG[status];
+                  const IconComp = STATUS_ICONS[config.iconName];
                   return (
                     <Pressable
                       key={status}
                       onPress={() => handleStatusChange(status)}
-                      className={`flex-row items-center px-4 py-3 rounded-lg overflow-hidden ${config.bgColor} active:opacity-80`}
+                      className={`flex-row items-center px-4 py-3 rounded-lg overflow-hidden ${config.bgColor} active:opacity-80 gap-2.5`}
                       style={{ borderCurve: 'continuous' }}
                     >
-                      <Text className="mr-3 text-[19px]">{config.icon}</Text>
+                      <IconComp size={16} color={config.iconColor} strokeWidth={2.2} />
                       <Text className={`font-sans text-[15px] font-medium tracking-tight ${config.color}`}>
                         Marcar como {config.label}
                       </Text>
@@ -233,16 +264,16 @@ export default function ServiceDetailScreen() {
           {/* Delete */}
           <Pressable
             onPress={handleDelete}
-            className="bg-coral-red/10 rounded-full py-4 items-center overflow-hidden active:opacity-80 mt-2"
+            className="bg-coral-red/10 rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden active:opacity-80 mt-2"
             style={{ borderCurve: 'continuous' }}
           >
+            <IconTrash size={16} color="#ff2b3a" strokeWidth={2} />
             <Text className="text-coral-red font-sans font-medium text-[15px] tracking-tight">
-              🗑️ Eliminar Servicio
+              Eliminar Servicio
             </Text>
           </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
-
   );
 }

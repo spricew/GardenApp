@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
+import { IconBell } from '@tabler/icons-react-native';
 import { REMINDER_OPTIONS } from '../types';
 
 interface ReminderPickerProps {
@@ -9,7 +10,12 @@ interface ReminderPickerProps {
 export function ReminderPicker({ value, onChange }: ReminderPickerProps) {
   return (
     <View>
-      <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight mb-2">⏰ Recordatorio</Text>
+      <View className="flex-row items-center gap-1.5 mb-2">
+        <IconBell size={14} color="#343433" strokeWidth={2} />
+        <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+          Recordatorio
+        </Text>
+      </View>
       <View className="flex-row flex-wrap gap-2">
         {REMINDER_OPTIONS.map((option) => (
           <Pressable

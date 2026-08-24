@@ -1,4 +1,5 @@
 import { View, Text, Pressable, Alert } from "react-native";
+import { IconBell, IconCheck } from '@tabler/icons-react-native';
 import { useNotifications } from "../../hooks/useNotifications";
 import { Card } from "../Card";
 
@@ -17,7 +18,13 @@ export function NotificationsSection() {
   };
 
   return (
-    <Card title="🔔 Notificaciones">
+    <Card>
+      <View className="flex-row items-center gap-2 mb-4">
+        <IconBell size={16} color="#343433" strokeWidth={2} />
+        <Text className="font-sans font-semibold text-[17px] text-charcoal-primary tracking-tight">
+          Notificaciones
+        </Text>
+      </View>
       <View className="flex-row items-center justify-between">
         <View className="flex-1 mr-4">
           <Text className="font-sans font-medium text-[15px] text-charcoal-primary">
@@ -29,11 +36,12 @@ export function NotificationsSection() {
         </View>
         {hasPermission ? (
           <View 
-            className="bg-valid-green/10 px-4 py-1.5 rounded-full overflow-hidden"
+            className="bg-valid-green/10 px-3.5 py-1.5 rounded-full overflow-hidden flex-row items-center gap-1.5"
             style={{ borderCurve: 'continuous' }}
           >
-            <Text className="text-valid-green text-[14px] font-sans font-semibold">
-              ✅ Activos
+            <IconCheck size={13} color="#00c454" strokeWidth={2.5} />
+            <Text className="text-valid-green text-[13px] font-sans font-semibold">
+              Activos
             </Text>
           </View>
         ) : (

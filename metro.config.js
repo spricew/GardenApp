@@ -8,6 +8,14 @@ if (!config.resolver.assetExts.includes("wasm")) {
   config.resolver.assetExts.push("wasm");
 }
 
+// 2. Soporte para extensiones .mjs y .cjs (usado por lucide-react-native y paquetes ESM)
+if (!config.resolver.sourceExts.includes("mjs")) {
+  config.resolver.sourceExts.push("mjs");
+}
+if (!config.resolver.sourceExts.includes("cjs")) {
+  config.resolver.sourceExts.push("cjs");
+}
+
 // 2. Encabezados necesarios para SharedArrayBuffer (usado por SQLite en web)
 config.server = config.server || {};
 config.server.enhanceMiddleware = (middleware) => {

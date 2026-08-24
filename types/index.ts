@@ -25,12 +25,23 @@ export interface ServiceFormData {
   reminder_minutes: number;
 }
 
-export const STATUS_CONFIG: Record<ServiceStatus, { label: string; color: string; bgColor: string; icon: string }> = {
-  pending: { label: 'Pendiente', color: 'text-sky-blue', bgColor: 'bg-sky-blue/10', icon: '🕐' },
-  in_progress: { label: 'En Proceso', color: 'text-deep-amber', bgColor: 'bg-sunburst-yellow/20', icon: '🔧' },
-  postponed: { label: 'Pospuesto', color: 'text-ember-orange', bgColor: 'bg-ember-orange/10', icon: '📅' },
-  done: { label: 'Realizado', color: 'text-valid-green', bgColor: 'bg-valid-green/10', icon: '✅' },
-  not_done: { label: 'No Realizado', color: 'text-coral-red', bgColor: 'bg-coral-red/10', icon: '❌' },
+export type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
+
+export const STATUS_CONFIG: Record<
+  ServiceStatus,
+  {
+    label: string;
+    color: string;
+    bgColor: string;
+    iconName: TablerIconName;
+    iconColor: string;
+  }
+> = {
+  pending: { label: 'Pendiente', color: 'text-sky-blue', bgColor: 'bg-sky-blue/10', iconName: 'IconClock', iconColor: '#0090ff' },
+  in_progress: { label: 'En Proceso', color: 'text-deep-amber', bgColor: 'bg-sunburst-yellow/20', iconName: 'IconRefresh', iconColor: '#d48f00' },
+  postponed: { label: 'Pospuesto', color: 'text-ember-orange', bgColor: 'bg-ember-orange/10', iconName: 'IconPlayerPause', iconColor: '#ff3e00' },
+  done: { label: 'Realizado', color: 'text-valid-green', bgColor: 'bg-valid-green/10', iconName: 'IconCircleCheck', iconColor: '#00c454' },
+  not_done: { label: 'No Realizado', color: 'text-coral-red', bgColor: 'bg-coral-red/10', iconName: 'IconCircleX', iconColor: '#ff2b3a' },
 };
 
 export const REMINDER_OPTIONS = [

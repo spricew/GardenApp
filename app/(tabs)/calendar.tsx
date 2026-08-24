@@ -1,6 +1,7 @@
 import { View, Text, Pressable, FlatList, ScrollView } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { IconChevronLeft, IconChevronRight, IconCalendar as CalendarIcon } from '@tabler/icons-react-native';
 import { useServices, useServiceDates } from "../../hooks/useServices";
 import { ServiceCard } from "../../components/ServiceCard";
 import { CalendarDay } from "../../components/CalendarDay";
@@ -63,14 +64,14 @@ export default function CalendarScreen() {
         <Card>
           {/* Month Navigation */}
           <View className="flex-row items-center justify-between pb-4">
-            <Pressable onPress={goToPrevMonth} className="p-2 active:opacity-50">
-              <Text className="text-3xl font-light text-graphite">‹</Text>
+            <Pressable onPress={goToPrevMonth} className="p-2 rounded-full active:bg-stone-surface">
+              <IconChevronLeft size={20} color="#474645" strokeWidth={2} />
             </Pressable>
             <Text className="font-display font-medium text-[23px] text-charcoal-primary tracking-[-0.44px] capitalize">
               {getMonthName(currentMonth)} {currentYear}
             </Text>
-            <Pressable onPress={goToNextMonth} className="p-2 active:opacity-50">
-              <Text className="text-3xl font-light text-graphite">›</Text>
+            <Pressable onPress={goToNextMonth} className="p-2 rounded-full active:bg-stone-surface">
+              <IconChevronRight size={20} color="#474645" strokeWidth={2} />
             </Pressable>
           </View>
 
@@ -122,10 +123,15 @@ export default function CalendarScreen() {
           Servicios del {selectedDate.split("-")[2]}/{selectedDate.split("-")[1]}
         </Text>
         {services.length === 0 ? (
-          <Card extraClassName="items-center justify-center py-20">
-            <Text className="text-4xl mb-4">🌱</Text>
-            <Text className="font-sans text-heading-sm font-medium text-graphite">
+          <Card extraClassName="items-center justify-center py-16">
+            <View className="w-16 h-16 rounded-full bg-stone-surface items-center justify-center mb-4" style={{ borderCurve: 'continuous' }}>
+              <CalendarIcon size={26} color="#848281" strokeWidth={1.8} />
+            </View>
+            <Text className="font-sans text-heading-sm font-semibold text-charcoal-primary">
               Sin servicios para este día
+            </Text>
+            <Text className="font-sans text-[14px] text-ash text-center mt-1">
+              Selecciona otro día o agrega un nuevo servicio
             </Text>
           </Card>
         ) : (

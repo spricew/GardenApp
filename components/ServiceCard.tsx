@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { IconMapPin, IconClock } from '@tabler/icons-react-native';
 import type { Service } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { formatTimeDisplay } from '../utils/dates';
@@ -24,23 +25,26 @@ export function ServiceCard({ service }: ServiceCardProps) {
               {service.client_name}
             </Text>
             {service.address ? (
-              <Text className="font-sans text-[15px] text-graphite mt-1" numberOfLines={1}>
-                📍 {service.address}
-              </Text>
+              <View className="flex-row items-center gap-1.5 mt-1.5">
+                <IconMapPin size={13} color="#848281" strokeWidth={2} />
+                <Text className="font-sans text-[14px] text-graphite flex-1" numberOfLines={1}>
+                  {service.address}
+                </Text>
+              </View>
             ) : null}
           </View>
           <StatusBadge status={service.status} size="sm" />
         </View>
 
-        <View className="flex-row items-center justify-between mt-3">
-          <View className="flex-row items-center">
-            <Text className="text-sm">🕐</Text>
-            <Text className="font-sans text-[15px] text-graphite ml-1">
+        <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-stone-surface">
+          <View className="flex-row items-center gap-1.5">
+            <IconClock size={13} color="#848281" strokeWidth={2} />
+            <Text className="font-sans text-[14px] text-graphite font-medium">
               {formatTimeDisplay(service.scheduled_time)}
             </Text>
           </View>
           {service.description ? (
-            <Text className="font-sans text-[15px] text-ash flex-1 ml-4" numberOfLines={1}>
+            <Text className="font-sans text-[14px] text-ash flex-1 ml-4 text-right" numberOfLines={1}>
               {service.description}
             </Text>
           ) : null}
