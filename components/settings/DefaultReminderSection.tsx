@@ -26,19 +26,17 @@ export function DefaultReminderSection({ defaultReminder, setDefaultReminder }: 
           <Pressable
             key={option.value}
             onPress={() => setDefaultReminder(option.value)}
-            className={`flex-row items-center justify-between px-4 py-3 rounded-lg overflow-hidden ${
-              defaultReminder === option.value
+            className={`flex-row items-center justify-between px-4 py-3 rounded-lg overflow-hidden ${defaultReminder === option.value
                 ? "bg-stone-surface"
                 : "bg-transparent"
-            }`}
+              }`}
             style={{ borderCurve: 'continuous' }}
           >
             <Text
-              className={`font-sans text-[15px] ${
-                defaultReminder === option.value
+              className={`font-sans text-[15px] ${defaultReminder === option.value
                   ? "text-charcoal-primary font-semibold tracking-tight"
                   : "text-graphite font-medium"
-              }`}
+                }`}
             >
               {option.label}
             </Text>

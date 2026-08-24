@@ -21,17 +21,15 @@ export function ReminderPicker({ value, onChange }: ReminderPickerProps) {
           <Pressable
             key={option.value}
             onPress={() => onChange(option.value)}
-            className={`px-4 py-2 rounded-full overflow-hidden ${
-              value === option.value
+            className={`px-4 py-2 rounded-full overflow-hidden ${value === option.value
                 ? 'bg-midnight'
                 : 'bg-stone-surface'
-            }`}
+              }`}
             style={{ borderCurve: 'continuous' }}
           >
             <Text
-              className={`font-sans font-medium text-[14px] tracking-tight ${
-                value === option.value ? 'text-white' : 'text-midnight'
-              }`}
+              className={`font-sans font-medium text-[14px] tracking-tight ${value === option.value ? 'text-white' : 'text-midnight'
+                }`}
             >
               {option.label}
             </Text>

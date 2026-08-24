@@ -6,9 +6,9 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
-import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, Icon } from '@tabler/icons-react-native';
+import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 import { StatusBadge } from "../../components/StatusBadge";
 import { Card } from "../../components/Card";
@@ -64,9 +64,11 @@ export default function ServiceDetailScreen() {
     }
   }, [db, id]);
 
-  useEffect(() => {
-    loadService();
-  }, [loadService]);
+  useFocusEffect(
+    useCallback(() => {
+      loadService();
+    }, [loadService])
+  );
 
   const handleStatusChange = async (newStatus: ServiceStatus) => {
     if (!service) return;
@@ -142,18 +144,24 @@ export default function ServiceDetailScreen() {
   const availableTransitions = STATUS_TRANSITIONS[service.status] || [];
   const timeTransform = (service.reminder_minutes/60)/24;
   return (
-    <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-      <ScrollView className="flex-1 bg-warm-canvas">
-        <View className="px-6 pt-6 pb-12 gap-3">
-          {/* Header */}
-          <View className="flex-row items-center mb-8">
-            <Pressable onPress={() => router.back()} className="mr-4 p-2 rounded-full active:bg-stone-surface">
-              <IconArrowLeft size={22} color="#474645" strokeWidth={2} />
+    <>
+      <Stack.Screen 
+        options={{ 
+          title: service.client_name,
+          headerTitleAlign: 'center',
+          headerRight: () => (
+            <Pressable 
+              onPress={() => router.push(`/service/edit/${service.id}`)} 
+              className="p-2 active:opacity-50"
+            >
+              <IconEdit size={22} color="#ff3e00" strokeWidth={2} />
             </Pressable>
-            <Text className="font-display font-medium text-heading-lg text-charcoal-primary flex-1 tracking-[-1.14px]" numberOfLines={1}>
-              {service.client_name}
-            </Text>
-          </View>
+          )
+        }} 
+      />
+      <SafeAreaView className="flex-1 bg-warm-canvas" edges={['bottom', 'left', 'right']}>
+        <ScrollView className="flex-1 bg-warm-canvas">
+          <View className="px-6 pt-2 pb-12 gap-3">
 
           {/* Status */}
           <Card title="Estado Actual">
@@ -275,5 +283,6 @@ export default function ServiceDetailScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </>
   );
 }

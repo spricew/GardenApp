@@ -7,21 +7,24 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { IconArrowLeft, IconUser, IconMapPin, IconAlignLeft, IconCalendar, IconClock, IconFileText, IconCheck } from '@tabler/icons-react-native';
+import { useRouter, Stack } from "expo-router";
+import { useState, useEffect } from "react";
+import { IconArrowLeft, IconUser, IconMapPin, IconAlignLeft, IconCalendar, IconClock, IconFileText, IconCheck, IconStar } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
+import { BlurView } from 'expo-blur';
 import { ReminderPicker } from "../../components/ReminderPicker";
 import { createService } from "../../database/services";
 import { scheduleServiceReminder } from "../../utils/notifications";
 import { updateServiceNotificationId } from "../../database/services";
 import { getServiceById } from "../../database/services";
+import { getClients, addClient, type Client } from "../../database/clients";
 import { getTodayISO } from "../../utils/dates";
 import type { ServiceFormData } from "../../types";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Card } from "../../components/Card";
 
 export default function NewServiceScreen() {
   const router = useRouter();
@@ -33,6 +36,37 @@ export default function NewServiceScreen() {
   const [notes, setNotes] = useState("");
   const [reminderMinutes, setReminderMinutes] = useState(2880);
   const [saving, setSaving] = useState(false);
+  
+  const [savedClients, setSavedClients] = useState<Client[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const clients = await getClients(db);
+        setSavedClients(clients);
+      } catch (e) {
+        console.error("Error loading clients", e);
+      }
+    };
+    loadClients();
+  }, [db]);
+
+  const handleSaveClient = async () => {
+    if (!clientName.trim()) return;
+    try {
+      await addClient(db, clientName.trim(), address.trim());
+      const clients = await getClients(db);
+      setSavedClients(clients);
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "No se pudo guardar el cliente");
+    }
+  };
+
+  const exactMatch = savedClients.find(c => c.name.toLowerCase() === clientName.trim().toLowerCase());
+  const filteredClients = savedClients.filter(c => c.name.toLowerCase().includes(clientName.trim().toLowerCase()));
+  const showDropdown = isFocused && filteredClients.length > 0 && !exactMatch;
 
   // Date/time state
   const [scheduledDate, setScheduledDate] = useState(new Date());
@@ -114,173 +148,243 @@ export default function NewServiceScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-      <ScrollView>
-        <View className="px-6 pt-6 pb-12">
-          {/* Header */}
-          <View className="flex-row items-center mb-8">
-            <Pressable onPress={() => router.back()} className="mr-4 p-2 rounded-full active:bg-stone-surface">
-              <IconArrowLeft size={22} color="#474645" strokeWidth={2} />
+    <>
+      <Stack.Screen
+        options={{
+          title: "Nuevo servicio",
+          headerTitleAlign: "center",
+          headerBackTitle: "Atrás",
+        }}
+      />
+      <SafeAreaView className="flex-1 bg-warm-canvas" edges={['bottom', 'left', 'right']}>
+        <ScrollView keyboardShouldPersistTaps="handled">
+          <View className="px-6 pt-2 pb-12 gap-2">
+            <Card>
+              {/* Client Name */}
+              <View className="mb-5 z-10">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <IconUser size={14} color="#343433" strokeWidth={2} />
+                    <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                      Cliente *
+                    </Text>
+                  </View>
+                  {clientName.trim().length > 0 && !exactMatch && (
+                    <Pressable onPress={handleSaveClient} className="flex-row items-center gap-1 active:opacity-50">
+                      <IconStar size={14} color="#f59e0b" strokeWidth={2} />
+                      <Text className="text-amber-500 font-sans text-[13px] font-medium">Guardar frecuente</Text>
+                    </Pressable>
+                  )}
+                </View>
+                <TextInput
+                  value={clientName}
+                  onChangeText={setClientName}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  placeholder="Nombre del cliente"
+                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+                  style={{ borderCurve: 'continuous' }}
+                  placeholderTextColor="#a7a7a7"
+                />
+                
+                {/* Saved Clients Dropdown */}
+                {showDropdown && (
+                  <View 
+                    className="absolute top-[88px] left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/40"
+                    style={{
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 8 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 24,
+                      elevation: 8,
+                    }}
+                  >
+                    <BlurView intensity={80} tint="light" className="border border-white/60 rounded-2xl max-h-[220px]">
+                      <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+                        {filteredClients.map((client, index) => (
+                          <Pressable 
+                            key={client.id}
+                            onPress={() => {
+                              setClientName(client.name);
+                              if (client.address) setAddress(client.address);
+                              setIsFocused(false);
+                            }}
+                            className={`px-4 py-3.5 active:bg-black/5 ${index !== filteredClients.length - 1 ? 'border-b border-black/5' : ''}`}
+                          >
+                            <Text className="font-sans text-[15px] text-charcoal-primary font-medium tracking-tight">{client.name}</Text>
+                            {client.address && (
+                              <Text className="font-sans text-[13px] text-graphite/70 mt-1" numberOfLines={1}>{client.address}</Text>
+                            )}
+                          </Pressable>
+                        ))}
+                      </ScrollView>
+                    </BlurView>
+                  </View>
+                )}
+              </View>
+
+              {/* Address */}
+              <View className="mb-5">
+                <View className="flex-row items-center gap-1.5 mb-2">
+                  <IconMapPin size={14} color="#343433" strokeWidth={2} />
+                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                    Dirección
+                  </Text>
+                </View>
+                <TextInput
+                  value={address}
+                  onChangeText={setAddress}
+                  placeholder="Dirección del servicio"
+                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+                  style={{ borderCurve: 'continuous' }}
+                  placeholderTextColor="#a7a7a7"
+                />
+              </View>
+
+              {/* Description */}
+              <View className="mb-5">
+                <View className="flex-row items-center gap-1.5 mb-2">
+                  <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
+                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                    Descripción
+                  </Text>
+                </View>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Tipo de servicio (poda, riego, limpieza...)"
+                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+                  style={{ borderCurve: 'continuous' }}
+                  placeholderTextColor="#a7a7a7"
+                />
+              </View>
+            </Card>
+
+            {/* Date & Time */}
+            <Card>
+            <View className="gap-5 mb-5">
+              <View className="w-full">
+                <View className="flex-row items-center gap-1.5 mb-2">
+                  <IconCalendar size={14} color="#343433" strokeWidth={2} />
+                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                    Fecha
+                  </Text>
+                </View>
+                {Platform.OS === 'ios' ? (
+                  <DateTimePicker
+                    value={scheduledDate}
+                    mode="date"
+                    display="spinner"
+                    onChange={onDateChange}
+                    minimumDate={new Date()}
+                    style={{ alignSelf: 'flex-start' }}
+                  />
+                ) : (
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
+                    style={{ borderCurve: 'continuous' }}
+                  >
+                    <Text className="font-sans text-[15px] text-graphite">
+                      {formatDateForDisplay(scheduledDate)}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+              <View className="w-full">
+                <View className="flex-row items-center gap-1.5 mb-2">
+                  <IconClock size={14} color="#343433" strokeWidth={2} />
+                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                    Hora
+                  </Text>
+                </View>
+                {Platform.OS === 'ios' ? (
+                  <DateTimePicker
+                    value={scheduledTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={onTimeChange}
+                    style={{ alignSelf: 'flex-start' }}
+                  />
+                ) : (
+                  <Pressable
+                    onPress={() => setShowTimePicker(true)}
+                    className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
+                    style={{ borderCurve: 'continuous' }}
+                  >
+                    <Text className="font-sans text-[15px] text-graphite">
+                      {formatTimeForDisplay(scheduledTime)}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+
+            {showDatePicker && Platform.OS === 'android' && (
+              <DateTimePicker
+                value={scheduledDate}
+                mode="date"
+                display="default"
+                onChange={onDateChange}
+                minimumDate={new Date()}
+              />
+            )}
+
+            {showTimePicker && Platform.OS === 'android' && (
+              <DateTimePicker
+                value={scheduledTime}
+                mode="time"
+                display="default"
+                onChange={onTimeChange}
+                is24Hour={false}
+              />
+            )}
+            </Card>
+
+            {/* Notes */}
+            <Card>
+              <View className="mb-5">
+                <View className="flex-row items-center gap-1.5 mb-2">
+                  <IconFileText size={14} color="#343433" strokeWidth={2} />
+                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                    Notas
+                  </Text>
+                </View>
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="Notas adicionales..."
+                  multiline
+                  numberOfLines={3}
+                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px] overflow-hidden"
+                  style={{ borderCurve: 'continuous' }}
+                  placeholderTextColor="#a7a7a7"
+                  textAlignVertical="top"
+                />
+              </View>
+
+              {/* Reminder */}
+              <View className="mb-8">
+                <ReminderPicker value={reminderMinutes} onChange={setReminderMinutes} />
+              </View>
+            </Card>
+
+            {/* Save Button */}
+            <Pressable
+              onPress={handleSave}
+              disabled={saving}
+              className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
+                }`}
+              style={{ borderCurve: 'continuous' }}
+            >
+              {!saving && <IconCheck size={18} color="#ffffff" strokeWidth={2.5} />}
+              <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
+                {saving ? "Guardando..." : "Guardar Servicio"}
+              </Text>
             </Pressable>
-            <Text className="font-display font-medium text-heading-lg text-charcoal-primary tracking-[-1.14px]">
-              Nuevo servicio
-            </Text>
           </View>
-
-          {/* Client Name */}
-          <View className="mb-5">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconUser size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Cliente *
-              </Text>
-            </View>
-            <TextInput
-              value={clientName}
-              onChangeText={setClientName}
-              placeholder="Nombre del cliente"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-              style={{ borderCurve: 'continuous' }}
-              placeholderTextColor="#a7a7a7"
-            />
-          </View>
-
-          {/* Address */}
-          <View className="mb-5">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconMapPin size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Dirección
-              </Text>
-            </View>
-            <TextInput
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Dirección del servicio"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-              style={{ borderCurve: 'continuous' }}
-              placeholderTextColor="#a7a7a7"
-            />
-          </View>
-
-          {/* Description */}
-          <View className="mb-5">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Descripción
-              </Text>
-            </View>
-            <TextInput
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Tipo de servicio (poda, riego, limpieza...)"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-              style={{ borderCurve: 'continuous' }}
-              placeholderTextColor="#a7a7a7"
-            />
-          </View>
-
-          {/* Date & Time */}
-          <View className="flex-row gap-4 mb-5">
-            <View className="flex-1">
-              <View className="flex-row items-center gap-1.5 mb-2">
-                <IconCalendar size={14} color="#343433" strokeWidth={2} />
-                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                  Fecha
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => setShowDatePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
-                style={{ borderCurve: 'continuous' }}
-              >
-                <Text className="font-sans text-[15px] text-graphite">
-                  {formatDateForDisplay(scheduledDate)}
-                </Text>
-              </Pressable>
-            </View>
-            <View className="flex-1">
-              <View className="flex-row items-center gap-1.5 mb-2">
-                <IconClock size={14} color="#343433" strokeWidth={2} />
-                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                  Hora
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => setShowTimePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
-                style={{ borderCurve: 'continuous' }}
-              >
-                <Text className="font-sans text-[15px] text-graphite">
-                  {formatTimeForDisplay(scheduledTime)}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={scheduledDate}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={onDateChange}
-              minimumDate={new Date()}
-            />
-          )}
-
-          {showTimePicker && (
-            <DateTimePicker
-              value={scheduledTime}
-              mode="time"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={onTimeChange}
-              is24Hour={false}
-            />
-          )}
-
-          {/* Notes */}
-          <View className="mb-5">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconFileText size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Notas
-              </Text>
-            </View>
-            <TextInput
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Notas adicionales..."
-              multiline
-              numberOfLines={3}
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite min-h-[80px] overflow-hidden"
-              style={{ borderCurve: 'continuous' }}
-              placeholderTextColor="#a7a7a7"
-              textAlignVertical="top"
-            />
-          </View>
-
-          {/* Reminder */}
-          <View className="mb-8">
-            <ReminderPicker value={reminderMinutes} onChange={setReminderMinutes} />
-          </View>
-
-          {/* Save Button */}
-          <Pressable
-            onPress={handleSave}
-            disabled={saving}
-            className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${
-              saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
-            }`}
-            style={{ borderCurve: 'continuous' }}
-          >
-            {!saving && <IconCheck size={18} color="#ffffff" strokeWidth={2.5} />}
-            <Text className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"}`}>
-              {saving ? "Guardando..." : "Guardar Servicio"}
-            </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
