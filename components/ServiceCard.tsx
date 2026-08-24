@@ -1,9 +1,9 @@
 import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { IconMapPin, IconClock } from '@tabler/icons-react-native';
-import type { Service } from '../types';
+import type { Service } from "@/types";
 import { StatusBadge } from './StatusBadge';
-import { formatTimeDisplay } from '../utils/dates';
+import { formatTimeDisplay } from "@/utils/dates";
 import { Card } from './Card';
 
 interface ServiceCardProps {

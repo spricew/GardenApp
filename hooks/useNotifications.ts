@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
-import { requestNotificationPermissions } from '../utils/notifications';
+import { requestNotificationPermissions } from "@/utils/notifications";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

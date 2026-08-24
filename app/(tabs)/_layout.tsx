@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { View, Text } from "react-native";
 import { IconHome, IconCalendar, IconSettings } from '@tabler/icons-react-native';
-import { getTodayISO, formatDateDisplay } from "../../utils/dates";
+import { getTodayISO, formatDateDisplay } from "@/utils/dates";
 
 export default function TabsLayout() {
   const today = formatDateDisplay(getTodayISO());
@@ -9,7 +9,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        animation: "shift",
+        animation: "fade",
         headerStyle: { backgroundColor: "#f1f1f1", shadowColor: "transparent" },
         headerTintColor: "#343433",
         headerTitleAlign: "center",

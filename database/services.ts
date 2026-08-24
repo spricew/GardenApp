@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Service, ServiceFormData, ServiceStatus } from '../types';
+import type { Service, ServiceFormData, ServiceStatus } from "@/types";
 
 export async function getAllServices(db: SQLiteDatabase): Promise<Service[]> {
   return await db.getAllAsync<Service>('SELECT * FROM services ORDER BY scheduled_date ASC, scheduled_time ASC');

@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Alert } from "react-native";
 import { IconBell, IconCheck } from '@tabler/icons-react-native';
-import { useNotifications } from "../../hooks/useNotifications";
-import { Card } from "../Card";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Card } from "@/components/Card";
 
 export function NotificationsSection() {
   const { hasPermission, requestPermission } = useNotifications();

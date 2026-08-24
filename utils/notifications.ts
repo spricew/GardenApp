@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import type { Service } from '../types';
+import type { Service } from "@/types";
 import { combineDateAndTime } from './dates';
 
 export async function requestNotificationPermissions(): Promise<boolean> {

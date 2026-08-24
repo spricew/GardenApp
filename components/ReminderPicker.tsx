@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { IconBell } from '@tabler/icons-react-native';
-import { REMINDER_OPTIONS } from '../types';
+import { REMINDER_OPTIONS } from "@/types";
 
 interface ReminderPickerProps {
   value: number;

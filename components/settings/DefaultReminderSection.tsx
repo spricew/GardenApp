@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { IconBell, IconCheck } from '@tabler/icons-react-native';
-import { REMINDER_OPTIONS } from "../../types";
-import { Card } from "../Card";
+import { REMINDER_OPTIONS } from "@/types";
+import { Card } from "@/components/Card";
 
 interface DefaultReminderSectionProps {
   defaultReminder: number;

@@ -2,12 +2,12 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { IconInbox, IconPlus } from '@tabler/icons-react-native';
-import { useServices } from "../../hooks/useServices";
-import { ServiceCard } from "../../components/ServiceCard";
-import { StatusBadge } from "../../components/StatusBadge";
-import { getTodayISO, formatDateDisplay } from "../../utils/dates";
+import { useServices } from "@/hooks/useServices";
+import { ServiceCard } from "@/components/ServiceCard";
+import { StatusBadge } from "@/components/StatusBadge";
+import { getTodayISO, formatDateDisplay } from "@/utils/dates";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type { ServiceStatus } from "../../types";
+import type { ServiceStatus } from "@/types";
 import { Card } from "@/components/Card";
 
 const FILTER_OPTIONS: { label: string; value: ServiceStatus | "all" }[] = [

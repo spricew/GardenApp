@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import type { Service, ServiceFormData, ServiceStatus } from '../types';
-import * as servicesDb from '../database/services';
-import { getTodayISO } from '../utils/dates';
-import { scheduleServiceReminder, cancelServiceReminder, rescheduleReminder } from '../utils/notifications';
+import type { Service, ServiceFormData, ServiceStatus } from "@/types";
+import * as servicesDb from "@/database/services";
+import { getTodayISO } from "@/utils/dates";
+import { scheduleServiceReminder, cancelServiceReminder, rescheduleReminder } from "@/utils/notifications";
 
 export function useServices(date?: string) {
   const db = useSQLiteContext();

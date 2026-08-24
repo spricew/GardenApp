@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { RecurringService, Service } from '../types';
-import { formatDateISO } from '../utils/dates';
-import { scheduleServiceReminder } from '../utils/notifications';
+import type { RecurringService, Service } from "@/types";
+import { formatDateISO } from "@/utils/dates";
+import { scheduleServiceReminder } from "@/utils/notifications";
 
 /**
  * Get all active recurring services.

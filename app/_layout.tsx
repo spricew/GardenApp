@@ -1,11 +1,11 @@
 // @ts-ignore - NativeWind CSS import
-import "../global.css";
+import "@/global.css";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { Suspense } from "react";
 import { View, ActivityIndicator, Text } from "react-native";
-import { migrateDb } from "../database/migrations";
-import { initRecurringServices } from "../database/recurring";
+import { migrateDb } from "@/database/migrations";
+import { initRecurringServices } from "@/database/recurring";
 
 async function initDb(db: import("expo-sqlite").SQLiteDatabase) {
   await migrateDb(db);

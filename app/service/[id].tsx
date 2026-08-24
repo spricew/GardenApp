@@ -10,21 +10,21 @@ import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-rou
 import { useState, useEffect, useCallback } from "react";
 import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
-import { StatusBadge } from "../../components/StatusBadge";
-import { Card } from "../../components/Card";
+import { StatusBadge } from "@/components/StatusBadge";
+import { Card } from "@/components/Card";
 import {
   getServiceById,
   updateServiceStatus,
   updateServiceNotificationId,
   deleteService,
-} from "../../database/services";
+} from "@/database/services";
 import {
   cancelServiceReminder,
   rescheduleReminder,
-} from "../../utils/notifications";
-import { formatDateDisplay, formatTimeDisplay } from "../../utils/dates";
-import type { Service, ServiceStatus } from "../../types";
-import { STATUS_CONFIG } from "../../types";
+} from "@/utils/notifications";
+import { formatDateDisplay, formatTimeDisplay } from "@/utils/dates";
+import type { Service, ServiceStatus } from "@/types";
+import { STATUS_CONFIG } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const STATUS_ICONS = {
@@ -142,7 +142,18 @@ export default function ServiceDetailScreen() {
   }
 
   const availableTransitions = STATUS_TRANSITIONS[service.status] || [];
-  const timeTransform = (service.reminder_minutes/60)/24;
+  
+  let reminderDisplay = "";
+  if (service.reminder_minutes < 60) {
+    reminderDisplay = `${service.reminder_minutes} minuto(s) antes`;
+  } else if (service.reminder_minutes < 1440) {
+    reminderDisplay = `${service.reminder_minutes / 60} hora(s) antes`;
+  } else if (service.reminder_minutes === 10080) {
+    reminderDisplay = "1 semana antes";
+  } else {
+    reminderDisplay = `${service.reminder_minutes / 1440} día(s) antes`;
+  }
+
   return (
     <>
       <Stack.Screen 
@@ -223,7 +234,7 @@ export default function ServiceDetailScreen() {
                   <Text className="font-sans text-[14px] text-ash">Aviso</Text>
                 </View>
                 <Text className="font-sans text-[15px] text-graphite flex-1">
-                  {timeTransform} día(s) antes
+                  {reminderDisplay}
                 </Text>
               </View>
             </View>

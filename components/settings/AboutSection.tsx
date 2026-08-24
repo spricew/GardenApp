@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import { IconInfoCircle } from '@tabler/icons-react-native';
-import { Card } from "../Card";
+import { Card } from "@/components/Card";
 
 export function AboutSection() {
   return (

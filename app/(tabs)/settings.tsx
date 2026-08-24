@@ -1,9 +1,9 @@
 import { View, Text, ScrollView } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { NotificationsSection } from "../../components/settings/NotificationsSection";
-import { DefaultReminderSection } from "../../components/settings/DefaultReminderSection";
-import { AboutSection } from "../../components/settings/AboutSection";
+import { NotificationsSection } from "@/components/settings/NotificationsSection";
+import { DefaultReminderSection } from "@/components/settings/DefaultReminderSection";
+import { AboutSection } from "@/components/settings/AboutSection";
 
 export default function SettingsScreen() {
   const [defaultReminder, setDefaultReminder] = useState(2880);
