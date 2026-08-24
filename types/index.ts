@@ -11,6 +11,23 @@ export interface Service {
   notes: string | null;
   reminder_minutes: number;
   notification_id: string | null;
+  recurring_service_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecurringService {
+  id: number;
+  client_name: string;
+  address: string | null;
+  description: string | null;
+  scheduled_time: string | null; // HH:MM
+  day_of_week: number; // 0=Sunday ... 6=Saturday
+  interval_weeks: number; // e.g. 2 = every 2 weeks (1 on, 1 off)
+  start_date: string; // YYYY-MM-DD — first occurrence
+  reminder_minutes: number;
+  notes: string | null;
+  is_active: number; // 1=active, 0=paused
   created_at: string;
   updated_at: string;
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import type { Service, ServiceFormData, ServiceStatus } from '../types';
 import * as servicesDb from '../database/services';
@@ -24,9 +25,11 @@ export function useServices(date?: string) {
     }
   }, [db, targetDate]);
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   const addService = useCallback(async (data: ServiceFormData) => {
     const id = await servicesDb.createService(db, data);
@@ -79,9 +82,11 @@ export function useServiceDates(year: number, month: number) {
   const db = useSQLiteContext();
   const [dates, setDates] = useState<string[]>([]);
 
-  useEffect(() => {
+  const loadDates = useCallback(() => {
     servicesDb.getServiceDatesInMonth(db, year, month).then(setDates);
   }, [db, year, month]);
+
+  useFocusEffect(loadDates);
 
   return dates;
 }
