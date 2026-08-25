@@ -13,6 +13,8 @@ export function CalendarDay({ day, isToday, isSelected, hasServices, onPress }: 
     ? 'bg-midnight'
     : isToday
     ? 'bg-stone-surface'
+    : hasServices
+    ? 'bg-ember-orange'
     : 'bg-transparent';
   const textClass = isSelected
     ? 'text-white font-bold'
@@ -27,10 +29,10 @@ export function CalendarDay({ day, isToday, isSelected, hasServices, onPress }: 
       style={{ borderCurve: 'continuous' }}
     >
       <Text className={`font-sans text-[15px] tracking-tight ${textClass}`}>{day}</Text>
-      {hasServices && (
+      {hasServices && (isSelected || isToday) && (
         <View
           className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${
-            isSelected ? 'bg-white' : 'bg-ember-orange'
+            isSelected ? 'bg-white' : 'bg-black'
           }`}
           style={{ borderCurve: 'continuous' }}
         />

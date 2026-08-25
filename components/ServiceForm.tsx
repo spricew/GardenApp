@@ -203,7 +203,7 @@ export function ServiceForm({
           {/* Saved Clients Dropdown */}
           {showDropdown && (
             <View
-              className="absolute top-[88px] left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/40"
+              className="absolute top-[76px] left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/40"
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 8 },
@@ -213,7 +213,7 @@ export function ServiceForm({
               }}
             >
               <BlurView
-                intensity={80}
+                intensity={40}
                 tint="light"
                 className="border border-white/60 rounded-2xl max-h-[220px]"
               >
@@ -302,10 +302,11 @@ export function ServiceForm({
               <DateTimePicker
                 value={scheduledDate}
                 mode="date"
-                display="spinner"
+                display="inline"
                 onChange={onDateChange}
                 minimumDate={new Date()}
                 style={{ alignSelf: "flex-start" }}
+                accentColor="green"
               />
             ) : (
               <Pressable
@@ -330,9 +331,10 @@ export function ServiceForm({
               <DateTimePicker
                 value={scheduledTime}
                 mode="time"
-                display="spinner"
+                display="compact"
                 onChange={onTimeChange}
                 style={{ alignSelf: "flex-start" }}
+                accentColor="green"
               />
             ) : (
               <Pressable
