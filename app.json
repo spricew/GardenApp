@@ -37,6 +37,19 @@
           "useSQLCipher": false
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "91a7e672-3be8-48cc-94fb-fb13735548df"
+      }
+    },
+    "owner": "spricew",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/91a7e672-3be8-48cc-94fb-fb13735548df"
+    }
   }
 }
