@@ -46,7 +46,7 @@ export default function NewServiceScreen() {
           headerBackTitle: "Atrás",
         }}
       />
-      <SafeAreaView className="flex-1 bg-warm-canvas" edges={['bottom', 'left', 'right']}>
+      <SafeAreaView className="flex-1 bg-warm-canvas" edges={['left', 'right']}>
         <ScrollView keyboardShouldPersistTaps="handled">
           <ServiceForm 
             onSubmit={handleSave} 
