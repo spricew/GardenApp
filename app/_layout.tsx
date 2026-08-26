@@ -73,6 +73,24 @@ export default function RootLayout() {
               headerBackTitle: "Atrás",
             }} 
           />
+          <Stack.Screen 
+            name="settings/clients" 
+            options={{ 
+              headerShown: true,
+              title: "Clientes Frecuentes",
+              headerTitleAlign: "center",
+              headerBackTitle: "Atrás",
+            }} 
+          />
+          <Stack.Screen 
+            name="settings/services" 
+            options={{ 
+              headerShown: true,
+              title: "Servicios Predeterminados",
+              headerTitleAlign: "center",
+              headerBackTitle: "Atrás",
+            }} 
+          />
         </Stack>
       </SQLiteProvider>
     </Suspense>

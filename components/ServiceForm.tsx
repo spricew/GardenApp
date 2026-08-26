@@ -27,6 +27,7 @@ import DateTimePicker, {
 import { Card } from "./Card";
 import { ReminderPicker } from "./ReminderPicker";
 import { getClients, addClient, type Client } from "@/database/clients";
+import { getDefaultServices, type DefaultService } from "@/database/default_services";
 import type { ServiceFormData } from "@/types";
 
 export interface ServiceFormValues {
@@ -100,20 +101,25 @@ export function ServiceForm({
   );
 
   const [savedClients, setSavedClients] = useState<Client[]>([]);
+  const [defaultServices, setDefaultServices] = useState<DefaultService[]>([]);
   const [isFocused, setIsFocused] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   useEffect(() => {
-    const loadClients = async () => {
+    const loadData = async () => {
       try {
-        const clients = await getClients(db);
+        const [clients, services] = await Promise.all([
+          getClients(db),
+          getDefaultServices(db)
+        ]);
         setSavedClients(clients);
+        setDefaultServices(services);
       } catch (e) {
-        console.error("Error loading clients", e);
+        console.error("Error loading initial data", e);
       }
     };
-    loadClients();
+    loadData();
   }, [db]);
 
   const handleSaveClient = async () => {
@@ -281,10 +287,37 @@ export function ServiceForm({
             value={description}
             onChangeText={setDescription}
             placeholder="Tipo de servicio (poda, riego, limpieza...)"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden mb-3"
             style={{ borderCurve: "continuous" }}
             placeholderTextColor="#a7a7a7"
           />
+          
+          {/* Default Services Pills */}
+          {defaultServices.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row overflow-visible">
+              {defaultServices.map((service) => {
+                const isSelected = description.trim().toLowerCase() === service.name.trim().toLowerCase();
+                return (
+                  <Pressable
+                    key={service.id}
+                    onPress={() => setDescription(service.name)}
+                    className={`mr-2 px-4 py-2 rounded-full border ${
+                      isSelected 
+                        ? 'bg-midnight border-midnight' 
+                        : 'bg-stone-surface/50 border-stone-surface'
+                    }`}
+                    style={{ borderCurve: 'continuous' }}
+                  >
+                    <Text className={`font-sans text-[13px] font-medium ${
+                      isSelected ? 'text-white' : 'text-charcoal-primary'
+                    }`}>
+                      {service.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
       </Card>
 

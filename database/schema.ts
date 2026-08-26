@@ -51,3 +51,11 @@ export const CREATE_CLIENTS_TABLE = `
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
 `;
+
+export const CREATE_DEFAULT_SERVICES_TABLE = `
+  CREATE TABLE IF NOT EXISTS default_services (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+  );
+`;
