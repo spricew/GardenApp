@@ -16,6 +16,7 @@ interface CalendarWidgetProps {
   currentMonth: number;
   selectedDate: string;
   serviceDates: string[];
+  paymentDates?: string[];
   todayISO: string;
   onMonthChange: (year: number, month: number) => void;
   onDateSelect: (date: string) => void;
@@ -26,6 +27,7 @@ export function CalendarWidget({
   currentMonth,
   selectedDate,
   serviceDates,
+  paymentDates = [],
   todayISO,
   onMonthChange,
   onDateSelect,
@@ -110,6 +112,12 @@ export function CalendarWidget({
                   selectedDate
                 }
                 hasServices={serviceDates.includes(
+                  `${currentYear}-${String(currentMonth).padStart(
+                    2,
+                    "0"
+                  )}-${String(day).padStart(2, "0")}`
+                )}
+                hasPayments={paymentDates.includes(
                   `${currentYear}-${String(currentMonth).padStart(
                     2,
                     "0"

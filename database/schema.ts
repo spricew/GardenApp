@@ -59,3 +59,16 @@ export const CREATE_DEFAULT_SERVICES_TABLE = `
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
 `;
+
+export const CREATE_PAYMENT_DATES_TABLE = `
+  CREATE TABLE IF NOT EXISTS payment_dates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_name TEXT NOT NULL,
+    amount REAL,
+    estimated_date TEXT NOT NULL,
+    notes TEXT,
+    is_paid INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+  );
+`;
