@@ -11,15 +11,15 @@ export const getDefaultReminder = async (): Promise<number> => {
       return parseInt(value, 10);
     }
   } catch (error) {
-    console.error('Error reading default reminder', error);
+    // Error handled silently
   }
-  return 2880; // 2 days default
+  return 2880;
 };
 
 export const setDefaultReminderStore = async (value: number): Promise<void> => {
   try {
     await AsyncStorage.setItem(SETTINGS_KEYS.DEFAULT_REMINDER, value.toString());
   } catch (error) {
-    console.error('Error saving default reminder', error);
+    // Error handled silently
   }
 };
