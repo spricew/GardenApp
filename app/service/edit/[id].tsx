@@ -22,8 +22,9 @@ export default function EditServiceScreen() {
   const loadService = useCallback(async () => {
     if (!id) return;
     try {
-      const service = await getServiceById(db, Number(id));
-      if (service) {
+      const result = await getServiceById(db, Number(id));
+      if (result.success && result.data) {
+        const service = result.data;
         setOriginalService(service);
         
         const dateObj = combineDateAndTime(service.scheduled_date, service.scheduled_time || "12:00") || new Date();
@@ -39,7 +40,7 @@ export default function EditServiceScreen() {
         });
       }
     } catch (error) {
-      console.error("Error loading service:", error);
+      // Error handled by state
     } finally {
       setLoading(false);
     }
@@ -54,22 +55,24 @@ export default function EditServiceScreen() {
 
     setSaving(true);
     try {
-      await updateService(db, Number(id), data);
+      const updateResult = await updateService(db, Number(id), data);
+      if (!updateResult.success) {
+        Alert.alert("Error", updateResult.error?.message || "No se pudo actualizar el servicio");
+        return;
+      }
 
-      // Re-schedule notification
       if (originalService.notification_id) {
         await cancelServiceReminder(originalService.notification_id);
       }
       
-      const updatedService = await getServiceById(db, Number(id));
-      if (updatedService) {
-        const notificationId = await scheduleServiceReminder(updatedService);
+      const serviceResult = await getServiceById(db, Number(id));
+      if (serviceResult.success && serviceResult.data) {
+        const notificationId = await scheduleServiceReminder(serviceResult.data);
         await updateServiceNotificationId(db, Number(id), notificationId || null);
       }
 
       router.back();
     } catch (error) {
-      console.error("Error updating service:", error);
       Alert.alert("Error", "No se pudo actualizar el servicio");
     } finally {
       setSaving(false);

@@ -2,9 +2,8 @@ import { View, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { useSQLiteContext } from "expo-sqlite";
-import { createService } from "@/database/services";
+import { createService, updateServiceNotificationId, getServiceById } from "@/database/services";
 import { scheduleServiceReminder } from "@/utils/notifications";
-import { updateServiceNotificationId, getServiceById } from "@/database/services";
 import type { ServiceFormData } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ServiceForm } from "@/components/ServiceForm";
@@ -27,12 +26,16 @@ export default function NewServiceScreen() {
   const handleSave = async (data: ServiceFormData) => {
     setSaving(true);
     try {
-      const id = await createService(db, data);
+      const createResult = await createService(db, data);
+      if (!createResult.success || createResult.data === undefined) {
+        Alert.alert("Error", createResult.error?.message || "No se pudo guardar el servicio");
+        return;
+      }
+      const id = createResult.data;
 
-      // Schedule notification
-      const service = await getServiceById(db, id);
-      if (service) {
-        const notificationId = await scheduleServiceReminder(service);
+      const serviceResult = await getServiceById(db, id);
+      if (serviceResult.success && serviceResult.data) {
+        const notificationId = await scheduleServiceReminder(serviceResult.data);
         if (notificationId) {
           await updateServiceNotificationId(db, id, notificationId);
         }
@@ -40,7 +43,6 @@ export default function NewServiceScreen() {
 
       router.back();
     } catch (error) {
-      console.error("Error creating service:", error);
       Alert.alert("Error", "No se pudo guardar el servicio");
     } finally {
       setSaving(false);

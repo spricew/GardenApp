@@ -5,7 +5,8 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useFocusEffect } from "expo-router";
 import { IconTrash, IconPlus, IconAlignLeft } from '@tabler/icons-react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getDefaultServices, addDefaultService, removeDefaultService, type DefaultService } from "../../database/default_services";
+import { getDefaultServices, addDefaultService, removeDefaultService } from "../../database/default_services";
+import type { DefaultService } from "@/types";
 import { Card } from "../../components/Card";
 
 export default function DefaultServicesSettingsScreen() {
@@ -17,10 +18,12 @@ export default function DefaultServicesSettingsScreen() {
 
   const loadServices = useCallback(async () => {
     try {
-      const data = await getDefaultServices(db);
-      setServices(data);
+      const result = await getDefaultServices(db);
+      if (result.success && result.data) {
+        setServices(result.data);
+      }
     } catch (e) {
-      console.error(e);
+      // Error handled by state
     } finally {
       setLoading(false);
     }
@@ -40,7 +43,11 @@ export default function DefaultServicesSettingsScreen() {
     
     setIsAdding(true);
     try {
-      await addDefaultService(db, newName.trim());
+      const result = await addDefaultService(db, newName.trim());
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo agregar el servicio");
+        return;
+      }
       setNewName("");
       await loadServices();
     } catch (e) {
@@ -61,7 +68,11 @@ export default function DefaultServicesSettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await removeDefaultService(db, id);
+              const result = await removeDefaultService(db, id);
+              if (!result.success) {
+                Alert.alert("Error", result.error?.message || "No se pudo eliminar el servicio");
+                return;
+              }
               await loadServices();
             } catch (e) {
               Alert.alert("Error", "No se pudo eliminar el servicio");

@@ -28,8 +28,8 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [filter, setFilter] = useState<CalendarFilter>("main");
 
-  const serviceDates = useServiceDates(currentYear, currentMonth);
-  const paymentDates = usePaymentDates(currentYear, currentMonth);
+  const { dates: serviceDates } = useServiceDates(currentYear, currentMonth);
+  const { dates: paymentDates } = usePaymentDates(currentYear, currentMonth);
 
   const { services, loading: servicesLoading } = useServices(selectedDate);
   const {

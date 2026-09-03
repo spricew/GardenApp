@@ -56,9 +56,11 @@ export default function ServiceDetailScreen() {
     setLoading(true);
     try {
       const result = await getServiceById(db, Number(id));
-      setService(result);
+      if (result.success && result.data) {
+        setService(result.data);
+      }
     } catch (error) {
-      console.error("Error loading service:", error);
+      // Error handled by state
     } finally {
       setLoading(false);
     }
@@ -73,9 +75,12 @@ export default function ServiceDetailScreen() {
   const handleStatusChange = async (newStatus: ServiceStatus) => {
     if (!service) return;
     try {
-      await updateServiceStatus(db, service.id, newStatus);
+      const updateResult = await updateServiceStatus(db, service.id, newStatus);
+      if (!updateResult.success) {
+        Alert.alert("Error", updateResult.error?.message || "No se pudo actualizar el estado");
+        return;
+      }
 
-      // Cancel notification if completed or not done
       if (
         (newStatus === "done" || newStatus === "not_done") &&
         service.notification_id
@@ -86,7 +91,6 @@ export default function ServiceDetailScreen() {
 
       await loadService();
     } catch (error) {
-      console.error("Error updating status:", error);
       Alert.alert("Error", "No se pudo actualizar el estado");
     }
   };
@@ -106,10 +110,13 @@ export default function ServiceDetailScreen() {
               if (service.notification_id) {
                 await cancelServiceReminder(service.notification_id);
               }
-              await deleteService(db, service.id);
+              const deleteResult = await deleteService(db, service.id);
+              if (!deleteResult.success) {
+                Alert.alert("Error", deleteResult.error?.message || "No se pudo eliminar el servicio");
+                return;
+              }
               router.back();
             } catch (error) {
-              console.error("Error deleting service:", error);
               Alert.alert("Error", "No se pudo eliminar el servicio");
             }
           },

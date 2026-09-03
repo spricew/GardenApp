@@ -7,8 +7,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Card } from "@/components/Card";
-import { createPaymentDate, type PaymentDateFormData } from "@/database/payments";
-import { getClients, type Client } from "@/database/clients";
+import { createPaymentDate } from "@/database/payments";
+import { getClients } from "@/database/clients";
+import type { PaymentDateFormData, Client } from "@/types";
 
 export default function NewPaymentScreen() {
   const router = useRouter();
@@ -26,10 +27,12 @@ export default function NewPaymentScreen() {
   useEffect(() => {
     const loadClients = async () => {
       try {
-        const clients = await getClients(db);
-        setSavedClients(clients);
+        const result = await getClients(db);
+        if (result.success && result.data) {
+          setSavedClients(result.data);
+        }
       } catch (e) {
-        console.error("Error loading clients", e);
+        // Error handled by state
       }
     };
     loadClients();
@@ -66,10 +69,13 @@ export default function NewPaymentScreen() {
         notes: notes.trim(),
       };
 
-      await createPaymentDate(db, data);
+      const result = await createPaymentDate(db, data);
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo guardar la fecha de pago");
+        return;
+      }
       router.back();
     } catch (error) {
-      console.error("Error creating payment date:", error);
       Alert.alert("Error", "No se pudo guardar la fecha de pago");
     } finally {
       setSaving(false);

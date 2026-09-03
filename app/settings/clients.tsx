@@ -5,7 +5,8 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useFocusEffect } from "expo-router";
 import { IconTrash, IconUserPlus, IconMapPin, IconUser } from '@tabler/icons-react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getClients, addClient, removeClient, type Client } from "../../database/clients";
+import { getClients, addClient, removeClient } from "../../database/clients";
+import type { Client } from "@/types";
 import { Card } from "../../components/Card";
 
 export default function ClientsSettingsScreen() {
@@ -18,10 +19,12 @@ export default function ClientsSettingsScreen() {
 
   const loadClients = useCallback(async () => {
     try {
-      const data = await getClients(db);
-      setClients(data);
+      const result = await getClients(db);
+      if (result.success && result.data) {
+        setClients(result.data);
+      }
     } catch (e) {
-      console.error(e);
+      // Error handled by state
     } finally {
       setLoading(false);
     }
@@ -41,7 +44,11 @@ export default function ClientsSettingsScreen() {
 
     setIsAdding(true);
     try {
-      await addClient(db, newName.trim(), newAddress.trim());
+      const result = await addClient(db, newName.trim(), newAddress.trim());
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo agregar el cliente");
+        return;
+      }
       setNewName("");
       setNewAddress("");
       await loadClients();
@@ -63,7 +70,11 @@ export default function ClientsSettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await removeClient(db, id);
+              const result = await removeClient(db, id);
+              if (!result.success) {
+                Alert.alert("Error", result.error?.message || "No se pudo eliminar el cliente");
+                return;
+              }
               await loadClients();
             } catch (e) {
               Alert.alert("Error", "No se pudo eliminar el cliente");
