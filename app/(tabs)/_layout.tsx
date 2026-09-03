@@ -52,7 +52,6 @@ export default function TabsLayout() {
         name="calendar"
         options={{
           title: "Calendario",
-          headerTitle: "Calendario",
           tabBarIcon: ({ color, size }) => <IconCalendar size={size || 20} color={color} strokeWidth={2} />,
         }}
       />

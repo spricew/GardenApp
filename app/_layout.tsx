@@ -59,7 +59,6 @@ export default function RootLayout() {
             name="service/new" 
             options={{ 
               headerShown: true,
-              title: "Nuevo servicio",
               headerTitleAlign: "center",
               headerBackTitle: "Atrás",
             }} 
@@ -87,6 +86,15 @@ export default function RootLayout() {
             options={{ 
               headerShown: true,
               title: "Servicios Predeterminados",
+              headerTitleAlign: "center",
+              headerBackTitle: "Atrás",
+            }} 
+          />
+          <Stack.Screen 
+            name="payment/new" 
+            options={{ 
+              headerShown: true,
+              title: "Fecha de Pago",
               headerTitleAlign: "center",
               headerBackTitle: "Atrás",
             }} 
