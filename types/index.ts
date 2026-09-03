@@ -5,8 +5,8 @@ export interface Service {
   client_name: string;
   address: string | null;
   description: string | null;
-  scheduled_date: string; // YYYY-MM-DD
-  scheduled_time: string | null; // HH:MM
+  scheduled_date: string;
+  scheduled_time: string | null;
   status: ServiceStatus;
   notes: string | null;
   reminder_minutes: number;
@@ -21,13 +21,13 @@ export interface RecurringService {
   client_name: string;
   address: string | null;
   description: string | null;
-  scheduled_time: string | null; // HH:MM
-  day_of_week: number; // 0=Sunday ... 6=Saturday
-  interval_weeks: number; // e.g. 2 = every 2 weeks (1 on, 1 off)
-  start_date: string; // YYYY-MM-DD — first occurrence
+  scheduled_time: string | null;
+  day_of_week: number;
+  interval_weeks: number;
+  start_date: string;
   reminder_minutes: number;
   notes: string | null;
-  is_active: number; // 1=active, 0=paused
+  is_active: number;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +40,47 @@ export interface ServiceFormData {
   scheduled_time: string;
   notes: string;
   reminder_minutes: number;
+}
+
+export interface PaymentDate {
+  id: number;
+  client_name: string;
+  amount: number | null;
+  estimated_date: string;
+  notes: string | null;
+  is_paid: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentDateFormData {
+  client_name: string;
+  amount: number | null;
+  estimated_date: string;
+  notes: string;
+}
+
+export interface Client {
+  id: number;
+  name: string;
+  address: string | null;
+}
+
+export interface DefaultService {
+  id: number;
+  name: string;
+}
+
+export interface AppError {
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+export interface DatabaseResult<T> {
+  success: boolean;
+  data?: T;
+  error?: AppError;
 }
 
 export type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
@@ -67,3 +108,15 @@ export const REMINDER_OPTIONS = [
   { label: '5 días antes', value: 7200 },
   { label: '1 semana antes', value: 10080 },
 ];
+
+export function createAppError(code: string, message: string, details?: unknown): AppError {
+  return { code, message, details };
+}
+
+export function createDatabaseResult<T>(data: T): DatabaseResult<T> {
+  return { success: true, data };
+}
+
+export function createDatabaseError<T>(code: string, message: string, details?: unknown): DatabaseResult<T> {
+  return { success: false, error: createAppError(code, message, details) };
+}
