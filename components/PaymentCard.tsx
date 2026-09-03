@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Alert } from "react-native";
 import { IconCurrencyDollar, IconCheck, IconTrash, IconClock } from "@tabler/icons-react-native";
-import type { PaymentDate } from "@/database/payments";
+import type { PaymentDate } from "@/types";
+import { Card } from "./Card";
 
 interface PaymentCardProps {
   payment: PaymentDate;
@@ -27,10 +28,7 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
   };
 
   return (
-    <View
-      className="bg-white rounded-2xl p-4 mb-3 border border-stone-surface shadow-sm overflow-hidden"
-      style={{ borderCurve: "continuous" }}
-    >
+    <Card extraClassName="mb-3">
       <View className="flex-row items-start justify-between">
         <View className="flex-1 mr-3">
           <View className="flex-row items-center gap-1.5 mb-1">
@@ -54,7 +52,6 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
             </Text>
           </View>
 
-          {/* Amount */}
           <Text className="font-sans font-bold text-[20px] text-graphite pl-7 tracking-tight">
             {payment.amount !== null && payment.amount !== undefined
               ? `$${payment.amount.toLocaleString("es-MX", {
@@ -71,7 +68,6 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
           ) : null}
         </View>
 
-        {/* Delete action */}
         <Pressable
           onPress={handleDelete}
           className="p-2 rounded-full active:bg-stone-surface"
@@ -80,7 +76,6 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
         </Pressable>
       </View>
 
-      {/* Footer / Toggle status button */}
       <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-stone-surface/60">
         <View className="flex-row items-center gap-1.5">
           {isPaid ? (
@@ -113,6 +108,6 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
           </Text>
         </Pressable>
       </View>
-    </View>
+    </Card>
   );
 }

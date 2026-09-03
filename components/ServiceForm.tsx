@@ -26,9 +26,9 @@ import DateTimePicker, {
 
 import { Card } from "./Card";
 import { ReminderPicker } from "./ReminderPicker";
-import { getClients, addClient, type Client } from "@/database/clients";
-import { getDefaultServices, type DefaultService } from "@/database/default_services";
-import type { ServiceFormData } from "@/types";
+import { getClients, addClient } from "@/database/clients";
+import { getDefaultServices } from "@/database/default_services";
+import type { ServiceFormData, Client, DefaultService } from "@/types";
 
 export interface ServiceFormValues {
   client_name: string;
@@ -109,14 +109,18 @@ export function ServiceForm({
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [clients, services] = await Promise.all([
+        const [clientsResult, servicesResult] = await Promise.all([
           getClients(db),
           getDefaultServices(db)
         ]);
-        setSavedClients(clients);
-        setDefaultServices(services);
+        if (clientsResult.success && clientsResult.data) {
+          setSavedClients(clientsResult.data);
+        }
+        if (servicesResult.success && servicesResult.data) {
+          setDefaultServices(servicesResult.data);
+        }
       } catch (e) {
-        console.error("Error loading initial data", e);
+        // Error handled by state
       }
     };
     loadData();
@@ -125,11 +129,16 @@ export function ServiceForm({
   const handleSaveClient = async () => {
     if (!clientName.trim()) return;
     try {
-      await addClient(db, clientName.trim(), address.trim());
-      const clients = await getClients(db);
-      setSavedClients(clients);
+      const result = await addClient(db, clientName.trim(), address.trim());
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo guardar el cliente");
+        return;
+      }
+      const clientsResult = await getClients(db);
+      if (clientsResult.success && clientsResult.data) {
+        setSavedClients(clientsResult.data);
+      }
     } catch (e) {
-      console.error(e);
       Alert.alert("Error", "No se pudo guardar el cliente");
     }
   };
