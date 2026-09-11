@@ -33,9 +33,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          headerStyle: {
+            height: 125,
+            backgroundColor: "#f1f1f1",
+            shadowColor: "transparent",
+            elevation: 0,
+          },
           title: "Inicio",
           headerTitle: () => (
-            <View style={{ alignItems: "center", paddingTop: 15 }}>
+            <View>
               <Text style={{ fontFamily: "Family", fontSize: 23, fontWeight: "500", color: "#343433", letterSpacing: -0.44, textAlign: "center" }}>
                 Hoy
               </Text>

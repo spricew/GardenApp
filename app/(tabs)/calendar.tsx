@@ -62,14 +62,12 @@ export default function CalendarScreen() {
 
   return (
     <>
-      <Stack.Screen
+      {/* <Stack.Screen
         options={{
           headerTitle: "Calendario",
           headerTitleAlign: "center",
         }}
-      />
-      <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-        {/* Header Filters */}
+      /> */}
 
         <ScrollView className="flex-1 bg-warm-canvas">
           {/* Calendar Section */}
@@ -147,7 +145,6 @@ export default function CalendarScreen() {
             )}
           </View>
         </ScrollView>
-      </SafeAreaView>
     </>
   );
 }

@@ -35,95 +35,93 @@ export default function TodayScreen() {
     filter === "all" ? services : services.filter((s) => s.status === filter);
 
   return (
-    <SafeAreaView className="flex-1 bg-warm-canvas" edges={['top']}>
-      <View className="flex-1 bg-warm-canvas">
-        {/* Filter chips */}
-        <View className="pb-4">
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={FILTER_OPTIONS}
-            keyExtractor={(item) => item.value}
-            style={{ flexGrow: 0 }}
-            contentContainerStyle={{ paddingHorizontal: 24 }}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => setFilter(item.value)}
-                className={`mr-3 px-4 py-2 rounded-full overflow-hidden ${filter === item.value
-                    ? "bg-midnight"
-                    : "bg-stone-surface"
+    <View className="flex-1 bg-warm-canvas mt-4">
+      {/* Filter chips */}
+      <View className="pb-4">
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={FILTER_OPTIONS}
+          keyExtractor={(item) => item.value}
+          style={{ flexGrow: 0 }}
+          contentContainerStyle={{ paddingHorizontal: 24 }}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => setFilter(item.value)}
+              className={`mr-3 px-4 py-2 rounded-full overflow-hidden ${filter === item.value
+                ? "bg-midnight"
+                : "bg-stone-surface"
+                }`}
+              style={{ borderCurve: 'continuous' }}
+            >
+              <Text
+                className={`font-sans font-medium text-[14px] tracking-tight ${filter === item.value ? "text-white" : "text-midnight"
                   }`}
-                style={{ borderCurve: 'continuous' }}
               >
-                <Text
-                  className={`font-sans font-medium text-[14px] tracking-tight ${filter === item.value ? "text-white" : "text-midnight"
-                    }`}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            )}
-          />
-        </View>
-
-        {/* Services & Payments List */}
-        {loading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#ff3e00" />
-          </View>
-        ) : (
-          <FlatList
-            data={filteredServices}
-            keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, gap: 6 }}
-            ListHeaderComponent={
-              payments.length > 0 ? (
-                <View className="mb-4">
-                  <View className="flex-row items-center gap-1.5 mb-2 pl-2">
-                    <IconReceipt2 size={16} color="#d48f00" strokeWidth={2.2} />
-                    <Text className="font-display font-medium text-[18px] text-charcoal-primary tracking-tight">
-                      Cobros para hoy ({payments.length})
-                    </Text>
-                  </View>
-                  {payments.map((payment) => (
-                    <PaymentCard
-                      key={payment.id}
-                      payment={payment}
-                      onTogglePaid={togglePaid}
-                      onDelete={removePayment}
-                    />
-                  ))}
-                  {filteredServices.length > 0 && (
-                    <View className="border-b border-stone-surface/70 mt-2 mb-3" />
-                  )}
-                </View>
-              ) : null
-            }
-            ListEmptyComponent={
-              <Card className="items-center py-12">
-                <View
-                  className="w-16 h-16 rounded-full bg-stone-surface items-center justify-center mb-5"
-                  style={{ borderCurve: "continuous" }}
-                >
-                  <IconInbox size={28} color="#848281" strokeWidth={1.8} />
-                </View>
-                <Text className="font-sans text-[20px] font-semibold text-charcoal-primary tracking-tight text-center">
-                  {filter === "all"
-                    ? "No hay servicios agendados para hoy"
-                    : "No hay servicios con ese estado"}
-                </Text>
-                <Text className="font-sans text-[14px] text-ash text-center mt-2">
-                  Presiona el botón + para agregar un servicio
-                </Text>
-              </Card>
-            }
-            renderItem={({ item }) => <ServiceCard service={item} />}
-          />
-        )}
-
-        {/* FAB Menu */}
-        <FABMenu />
+                {item.label}
+              </Text>
+            </Pressable>
+          )}
+        />
       </View>
-    </SafeAreaView>
+
+      {/* Services & Payments List */}
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#ff3e00" />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredServices}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, gap: 6 }}
+          ListHeaderComponent={
+            payments.length > 0 ? (
+              <View className="mb-4">
+                <View className="flex-row items-center gap-1.5 mb-2 pl-2">
+                  <IconReceipt2 size={16} color="#d48f00" strokeWidth={2.2} />
+                  <Text className="font-display font-medium text-[18px] text-charcoal-primary tracking-tight">
+                    Cobros para hoy ({payments.length})
+                  </Text>
+                </View>
+                {payments.map((payment) => (
+                  <PaymentCard
+                    key={payment.id}
+                    payment={payment}
+                    onTogglePaid={togglePaid}
+                    onDelete={removePayment}
+                  />
+                ))}
+                {filteredServices.length > 0 && (
+                  <View className="border-b border-stone-surface/70 mt-2 mb-3" />
+                )}
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={
+            <Card className="items-center py-12">
+              <View
+                className="w-16 h-16 rounded-full bg-stone-surface items-center justify-center mb-5"
+                style={{ borderCurve: "continuous" }}
+              >
+                <IconInbox size={28} color="#848281" strokeWidth={1.8} />
+              </View>
+              <Text className="font-sans text-[20px] font-semibold text-charcoal-primary tracking-tight text-center">
+                {filter === "all"
+                  ? "No hay servicios agendados para hoy"
+                  : "No hay servicios con ese estado"}
+              </Text>
+              <Text className="font-sans text-[14px] text-ash text-center mt-2">
+                Presiona el botón + para agregar un servicio
+              </Text>
+            </Card>
+          }
+          renderItem={({ item }) => <ServiceCard service={item} />}
+        />
+      )}
+
+      {/* FAB Menu */}
+      <FABMenu />
+    </View>
   );
 }
