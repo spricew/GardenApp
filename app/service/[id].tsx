@@ -5,10 +5,12 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  ActionSheetIOS,
+  Platform,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
-import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit } from '@tabler/icons-react-native';
+import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/Card";
@@ -161,6 +163,43 @@ export default function ServiceDetailScreen() {
     reminderDisplay = `${service.reminder_minutes / 1440} día(s) antes`;
   }
 
+  const handleOpenActionSheet = () => {
+    if (!service) return;
+    if (Platform.OS === 'ios') {
+      const statusLabels = availableTransitions.map(
+        (st) => `Marcar como ${STATUS_CONFIG[st].label}`
+      );
+      const options = ["Cancelar", "Editar Servicio", ...statusLabels, "Eliminar Servicio"];
+      const destructiveIndex = options.length - 1;
+
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: service.client_name,
+          message: "Opciones del servicio",
+          options,
+          cancelButtonIndex: 0,
+          destructiveButtonIndex: destructiveIndex,
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) {
+            router.push(`/service/edit/${service.id}`);
+          } else if (buttonIndex > 1 && buttonIndex < destructiveIndex) {
+            const nextStatus = availableTransitions[buttonIndex - 2];
+            handleStatusChange(nextStatus);
+          } else if (buttonIndex === destructiveIndex) {
+            handleDelete();
+          }
+        }
+      );
+    } else {
+      Alert.alert("Opciones", service.client_name, [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Editar Servicio", onPress: () => router.push(`/service/edit/${service.id}`) },
+        { text: "Eliminar Servicio", style: "destructive", onPress: handleDelete },
+      ]);
+    }
+  };
+
   return (
     <>
       <Stack.Screen 
@@ -168,12 +207,20 @@ export default function ServiceDetailScreen() {
           title: service.client_name,
           headerTitleAlign: 'center',
           headerRight: () => (
-            <Pressable 
-              onPress={() => router.push(`/service/edit/${service.id}`)} 
-              className="p-2 active:opacity-50"
-            >
-              <IconEdit size={22} color="#ff3e00" strokeWidth={2} />
-            </Pressable>
+            <View className="flex-row items-center gap-1">
+              <Pressable 
+                onPress={() => router.push(`/service/edit/${service.id}`)} 
+                className="p-2 active:opacity-50"
+              >
+                <IconEdit size={22} color="#ff3e00" strokeWidth={2} />
+              </Pressable>
+              <Pressable 
+                onPress={handleOpenActionSheet} 
+                className="p-2 active:opacity-50"
+              >
+                <IconDots size={22} color="#343433" strokeWidth={2} />
+              </Pressable>
+            </View>
           )
         }} 
       />

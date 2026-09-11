@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, ActionSheetIOS, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { IconMapPin, IconClock } from '@tabler/icons-react-native';
 import type { Service } from "@/types";
@@ -13,9 +13,30 @@ interface ServiceCardProps {
 export function ServiceCard({ service }: ServiceCardProps) {
   const router = useRouter();
 
+  const handleLongPress = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: service.client_name,
+          message: service.description || service.address || "Opciones del servicio",
+          options: ["Cancelar", "Ver Detalle", "Editar Servicio"],
+          cancelButtonIndex: 0,
+        },
+        (buttonIndex: number) => {
+          if (buttonIndex === 1) {
+            router.push(`/service/${service.id}`);
+          } else if (buttonIndex === 2) {
+            router.push(`/service/edit/${service.id}`);
+          }
+        }
+      );
+    }
+  };
+
   return (
     <Pressable
       onPress={() => router.push(`/service/${service.id}`)}
+      onLongPress={handleLongPress}
       className="active:scale-[0.98]"
     >
       <Card>
