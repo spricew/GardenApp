@@ -161,6 +161,32 @@ export function ServiceForm({
     if (selectedTime) setScheduledTime(selectedTime);
   };
 
+  const selectedServices = description
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const isServiceSelected = (serviceName: string) => {
+    const target = serviceName.trim().toLowerCase();
+    return selectedServices.some((s) => s.toLowerCase() === target);
+  };
+
+  const handleToggleService = (serviceName: string) => {
+    const target = serviceName.trim();
+    const isSelected = isServiceSelected(target);
+
+    let updated: string[];
+    if (isSelected) {
+      updated = selectedServices.filter(
+        (s) => s.toLowerCase() !== target.toLowerCase()
+      );
+    } else {
+      updated = [...selectedServices, target];
+    }
+
+    setDescription(updated.join(", "));
+  };
+
   const handleSubmit = () => {
     if (!clientName.trim()) {
       Alert.alert("Error", "El nombre del cliente es obligatorio");
@@ -284,48 +310,59 @@ export function ServiceForm({
           />
         </View>
 
-        {/* Description */}
+        {/* Description / Services */}
         <View className="mb-5">
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-              Descripción
-            </Text>
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center gap-1.5">
+              <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
+              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                Servicios
+              </Text>
+            </View>
+            {selectedServices.length > 0 && (
+              <Text className="font-sans text-[12px] font-medium text-ash">
+                {selectedServices.length}{" "}
+                {selectedServices.length === 1 ? "seleccionado" : "seleccionados"}
+              </Text>
+            )}
           </View>
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="Tipo de servicio (poda, riego, limpieza...)"
+            placeholder="Selecciona servicios o escribe aquí..."
             className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden mb-3"
             style={{ borderCurve: "continuous" }}
             placeholderTextColor="#a7a7a7"
           />
           
-          {/* Default Services Pills */}
+          {/* Default Services Pills - Multi-select */}
           {defaultServices.length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row overflow-visible">
+            <View className="flex-row flex-wrap gap-2">
               {defaultServices.map((service) => {
-                const isSelected = description.trim().toLowerCase() === service.name.trim().toLowerCase();
+                const isSelected = isServiceSelected(service.name);
                 return (
                   <Pressable
                     key={service.id}
-                    onPress={() => setDescription(service.name)}
-                    className={`mr-2 px-4 py-2 rounded-full border ${
+                    onPress={() => handleToggleService(service.name)}
+                    className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border active:scale-95 ${
                       isSelected 
                         ? 'bg-midnight border-midnight' 
-                        : 'bg-stone-surface/50 border-stone-surface'
+                        : 'bg-stone-surface/60 border-stone-surface active:bg-stone-surface'
                     }`}
                     style={{ borderCurve: 'continuous' }}
                   >
-                    <Text className={`font-sans text-[13px] font-medium ${
-                      isSelected ? 'text-white' : 'text-charcoal-primary'
+                    {isSelected && (
+                      <IconCheck size={13} color="#ffffff" strokeWidth={2.5} />
+                    )}
+                    <Text className={`font-sans text-[13px] ${
+                      isSelected ? 'text-white font-semibold' : 'text-charcoal-primary font-medium'
                     }`}>
                       {service.name}
                     </Text>
                   </Pressable>
                 );
               })}
-            </ScrollView>
+            </View>
           )}
         </View>
       </Card>
@@ -440,6 +477,8 @@ export function ServiceForm({
           <ReminderPicker
             value={reminderMinutes}
             onChange={setReminderMinutes}
+            scheduledDate={scheduledDate}
+            scheduledTime={scheduledTime}
           />
         </View>
       </Card>

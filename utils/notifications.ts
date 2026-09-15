@@ -29,6 +29,8 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 }
 
 export async function scheduleServiceReminder(service: Service): Promise<string | null> {
+  if (!service.reminder_minutes || service.reminder_minutes <= 0) return null;
+
   const triggerDate = combineDateAndTime(service.scheduled_date, service.scheduled_time);
   if (!triggerDate) return null;
 
@@ -36,10 +38,19 @@ export async function scheduleServiceReminder(service: Service): Promise<string 
 
   if (reminderDate <= new Date()) return null;
 
+  let timeText = `${service.reminder_minutes} minutos`;
+  if (service.reminder_minutes >= 1440) {
+    const days = Math.round(service.reminder_minutes / 1440);
+    timeText = `${days} día${days > 1 ? 's' : ''}`;
+  } else if (service.reminder_minutes >= 60) {
+    const hours = Math.round(service.reminder_minutes / 60);
+    timeText = `${hours} hora${hours > 1 ? 's' : ''}`;
+  }
+
   const id = await Notifications.scheduleNotificationAsync({
     content: {
       title: '🌿 Recordatorio de Servicio',
-      body: `Servicio para ${service.client_name} en ${service.reminder_minutes} minutos${service.address ? ` - ${service.address}` : ''}`,
+      body: `Servicio para ${service.client_name} en ${timeText}${service.address ? ` - ${service.address}` : ''}`,
       data: { serviceId: service.id },
       sound: true,
     },

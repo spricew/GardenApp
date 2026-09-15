@@ -103,6 +103,10 @@ export const STATUS_CONFIG: Record<
 };
 
 export const REMINDER_OPTIONS = [
+  { label: 'Sin recordatorio', value: 0 },
+  { label: '30 min antes', value: 30 },
+  { label: '1 hora antes', value: 60 },
+  { label: '2 horas antes', value: 120 },
   { label: '1 día antes', value: 1440 },
   { label: '2 días antes', value: 2880 },
   { label: '5 días antes', value: 7200 },

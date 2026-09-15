@@ -153,14 +153,18 @@ export default function ServiceDetailScreen() {
   const availableTransitions = STATUS_TRANSITIONS[service.status] || [];
   
   let reminderDisplay = "";
-  if (service.reminder_minutes < 60) {
+  if (!service.reminder_minutes || service.reminder_minutes <= 0) {
+    reminderDisplay = "Sin recordatorio";
+  } else if (service.reminder_minutes < 60) {
     reminderDisplay = `${service.reminder_minutes} minuto(s) antes`;
   } else if (service.reminder_minutes < 1440) {
-    reminderDisplay = `${service.reminder_minutes / 60} hora(s) antes`;
+    const hours = Math.round(service.reminder_minutes / 60);
+    reminderDisplay = `${hours} hora${hours > 1 ? "s" : ""} antes`;
   } else if (service.reminder_minutes === 10080) {
     reminderDisplay = "1 semana antes";
   } else {
-    reminderDisplay = `${service.reminder_minutes / 1440} día(s) antes`;
+    const days = Math.round(service.reminder_minutes / 1440);
+    reminderDisplay = `${days} día${days > 1 ? "s" : ""} antes`;
   }
 
   const handleOpenActionSheet = () => {
