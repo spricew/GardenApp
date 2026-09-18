@@ -150,46 +150,51 @@ export default function NewPaymentScreen() {
               {/* Floating Clients Dropdown */}
               {showDropdown && (
                 <View
-                  className="absolute left-6 right-6 rounded-xl overflow-hidden bg-white"
+                  className="absolute left-6 right-6 rounded-xl bg-white"
                   style={{
                     top: clientInputLayout.y + 24 + 6,
                     zIndex: 999,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.15,
-                    shadowRadius: 16,
-                    elevation: 10,
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowOpacity: 0.14,
+                    shadowRadius: 22,
+                    elevation: 12,
                     borderCurve: "continuous",
                     borderWidth: 0.5,
-                    borderColor: "rgba(0,0,0,0.08)",
+                    borderColor: "rgba(0,0,0,0.06)",
                   }}
                 >
-                  <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    nestedScrollEnabled
-                    style={{ maxHeight: 220 }}
+                  <View
+                    className="rounded-xl overflow-hidden"
+                    style={{ borderCurve: "continuous" }}
                   >
-                    {filteredClients.map((client, index) => (
-                      <Pressable
-                        key={client.id}
-                        onPress={() => {
-                          setClientName(client.name);
-                          setIsFocused(false);
-                        }}
-                        className="active:bg-stone-surface/60"
-                        style={{
-                          paddingHorizontal: 16,
-                          paddingVertical: 12,
-                          borderBottomWidth: index !== filteredClients.length - 1 ? 0.5 : 0,
-                          borderBottomColor: "rgba(0,0,0,0.06)",
-                        }}
-                      >
-                        <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
-                          {client.name}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
+                    <ScrollView
+                      keyboardShouldPersistTaps="handled"
+                      nestedScrollEnabled
+                      style={{ maxHeight: 324 }}
+                    >
+                      {filteredClients.map((client, index) => (
+                        <Pressable
+                          key={client.id}
+                          onPress={() => {
+                            setClientName(client.name);
+                            setIsFocused(false);
+                          }}
+                          className="active:bg-stone-surface/60"
+                          style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 12,
+                            borderBottomWidth: index !== filteredClients.length - 1 ? 0.5 : 0,
+                            borderBottomColor: "rgba(0,0,0,0.06)",
+                          }}
+                        >
+                          <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
+                            {client.name}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
                 </View>
               )}
             </View>

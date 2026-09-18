@@ -147,11 +147,10 @@ export function ServiceForm({
                     <Pressable
                       key={service.id}
                       onPress={() => form.handleToggleService(service.name)}
-                      className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border active:scale-95 ${
-                        isSelected
+                      className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border active:scale-95 ${isSelected
                           ? "bg-midnight border-midnight"
                           : "bg-stone-surface/60 border-stone-surface active:bg-stone-surface"
-                      }`}
+                        }`}
                       style={{ borderCurve: "continuous" }}
                     >
                       {isSelected && (
@@ -162,11 +161,10 @@ export function ServiceForm({
                         />
                       )}
                       <Text
-                        className={`font-sans text-[13px] ${
-                          isSelected
+                        className={`font-sans text-[13px] ${isSelected
                             ? "text-white font-semibold"
                             : "text-charcoal-primary font-medium"
-                        }`}
+                          }`}
                       >
                         {service.name}
                       </Text>
@@ -181,52 +179,57 @@ export function ServiceForm({
         {/* Floating Clients Dropdown — rendered outside Card to avoid overflow clip */}
         {form.showDropdown && (
           <View
-            className="absolute left-6 right-6 rounded-xl overflow-hidden bg-white"
+            className="absolute left-6 right-6 rounded-xl bg-white"
             style={{
               top: form.clientInputLayout.y + 24 + 6,
               zIndex: 999,
               shadowColor: "#000",
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.15,
-              shadowRadius: 16,
-              elevation: 10,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.14,
+              shadowRadius: 22,
+              elevation: 12,
               borderCurve: "continuous",
               borderWidth: 0.5,
-              borderColor: "rgba(0,0,0,0.08)",
+              borderColor: "rgba(0,0,0,0.06)",
             }}
           >
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              nestedScrollEnabled
-              style={{ maxHeight: 220 }}
+            <View
+              className="rounded-xl overflow-hidden"
+              style={{ borderCurve: "continuous" }}
             >
-              {form.filteredClients.map((client, index) => (
-                <Pressable
-                  key={client.id}
-                  onPress={() => form.handleSelectClient(client)}
-                  className="active:bg-stone-surface/60"
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderBottomWidth:
-                      index !== form.filteredClients.length - 1 ? 0.5 : 0,
-                    borderBottomColor: "rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
-                    {client.name}
-                  </Text>
-                  {client.address && (
-                    <Text
-                      className="font-sans text-[13px] text-ash mt-0.5"
-                      numberOfLines={1}
-                    >
-                      {client.address}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+                style={{ maxHeight: 324 }}
+              >
+                {form.filteredClients.map((client, index) => (
+                  <Pressable
+                    key={client.id}
+                    onPress={() => form.handleSelectClient(client)}
+                    className="active:bg-stone-surface/60"
+                    style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      borderBottomWidth:
+                        index !== form.filteredClients.length - 1 ? 0.5 : 0,
+                      borderBottomColor: "rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
+                      {client.name}
                     </Text>
-                  )}
-                </Pressable>
-              ))}
-            </ScrollView>
+                    {client.address && (
+                      <Text
+                        className="font-sans text-[13px] text-ash mt-0.5"
+                        numberOfLines={1}
+                      >
+                        {client.address}
+                      </Text>
+                    )}
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         )}
       </View>
@@ -351,16 +354,14 @@ export function ServiceForm({
       <Pressable
         onPress={form.handleSubmit}
         disabled={saving}
-        className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${
-          saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
-        }`}
+        className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
+          }`}
         style={{ borderCurve: "continuous" }}
       >
         {!saving && <IconCheck size={18} color="#ffffff" strokeWidth={2.5} />}
         <Text
-          className={`font-sans font-medium text-[15px] tracking-tight ${
-            saving ? "text-ash" : "text-white"
-          }`}
+          className={`font-sans font-medium text-[15px] tracking-tight ${saving ? "text-ash" : "text-white"
+            }`}
         >
           {saving ? "Guardando..." : buttonLabel}
         </Text>
