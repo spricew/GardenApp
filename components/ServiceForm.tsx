@@ -5,9 +5,7 @@ import {
   Pressable,
   ScrollView,
   Platform,
-  Alert,
 } from "react-native";
-import { useState, useEffect } from "react";
 import {
   IconUser,
   IconMapPin,
@@ -18,64 +16,26 @@ import {
   IconCheck,
   IconStar,
 } from "@tabler/icons-react-native";
-import { useSQLiteContext } from "expo-sqlite";
-import { BlurView } from "expo-blur";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Card } from "./Card";
 import { ReminderPicker } from "./ReminderPicker";
-import { getClients, addClient } from "@/database/clients";
-import { getDefaultServices } from "@/database/default_services";
-import type { ServiceFormData, Client, DefaultService } from "@/types";
+import {
+  useServiceForm,
+  formatDateForDisplay,
+  formatTimeForDisplay,
+} from "@/hooks/useServiceForm";
+import type { ServiceFormData } from "@/types";
 
-export interface ServiceFormValues {
-  client_name: string;
-  address: string;
-  description: string;
-  scheduled_date: Date;
-  scheduled_time: Date;
-  notes: string;
-  reminder_minutes: number;
-}
+// Re-export so existing consumers don't break
+export type { ServiceFormValues } from "@/hooks/useServiceForm";
 
 interface ServiceFormProps {
-  initialValues?: Partial<ServiceFormValues>;
+  initialValues?: Parameters<typeof useServiceForm>[0]["initialValues"];
   onSubmit: (data: ServiceFormData) => void;
   saving: boolean;
   buttonLabel?: string;
 }
-
-const formatDate = (date: Date) => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(date.getDate()).padStart(2, "0")}`;
-};
-
-const formatTime = (date: Date) => {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes()
-  ).padStart(2, "0")}`;
-};
-
-const formatDateForDisplay = (date: Date) => {
-  return date.toLocaleDateString("es-MX", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const formatTimeForDisplay = (date: Date) => {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM";
-  const displayHours = hours % 12 || 12;
-  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
-};
 
 export function ServiceForm({
   initialValues,
@@ -83,289 +43,193 @@ export function ServiceForm({
   saving,
   buttonLabel = "Guardar Servicio",
 }: ServiceFormProps) {
-  const db = useSQLiteContext();
-
-  const [clientName, setClientName] = useState(initialValues?.client_name || "");
-  const [address, setAddress] = useState(initialValues?.address || "");
-  const [description, setDescription] = useState(initialValues?.description || "");
-  const [notes, setNotes] = useState(initialValues?.notes || "");
-  const [reminderMinutes, setReminderMinutes] = useState(
-    initialValues?.reminder_minutes ?? 2880
-  );
-
-  const [scheduledDate, setScheduledDate] = useState(
-    initialValues?.scheduled_date || new Date()
-  );
-  const [scheduledTime, setScheduledTime] = useState(
-    initialValues?.scheduled_time || new Date()
-  );
-
-  const [savedClients, setSavedClients] = useState<Client[]>([]);
-  const [defaultServices, setDefaultServices] = useState<DefaultService[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [clientsResult, servicesResult] = await Promise.all([
-          getClients(db),
-          getDefaultServices(db)
-        ]);
-        if (clientsResult.success && clientsResult.data) {
-          setSavedClients(clientsResult.data);
-        }
-        if (servicesResult.success && servicesResult.data) {
-          setDefaultServices(servicesResult.data);
-        }
-      } catch (e) {
-        // Error handled by state
-      }
-    };
-    loadData();
-  }, [db]);
-
-  const handleSaveClient = async () => {
-    if (!clientName.trim()) return;
-    try {
-      const result = await addClient(db, clientName.trim(), address.trim());
-      if (!result.success) {
-        Alert.alert("Error", result.error?.message || "No se pudo guardar el cliente");
-        return;
-      }
-      const clientsResult = await getClients(db);
-      if (clientsResult.success && clientsResult.data) {
-        setSavedClients(clientsResult.data);
-      }
-    } catch (e) {
-      Alert.alert("Error", "No se pudo guardar el cliente");
-    }
-  };
-
-  const exactMatch = savedClients.find(
-    (c) => c.name.toLowerCase() === clientName.trim().toLowerCase()
-  );
-  const filteredClients = savedClients.filter((c) =>
-    c.name.toLowerCase().includes(clientName.trim().toLowerCase())
-  );
-  const showDropdown = isFocused && filteredClients.length > 0 && !exactMatch;
-
-  const onDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) setScheduledDate(selectedDate);
-  };
-
-  const onTimeChange = (_event: DateTimePickerEvent, selectedTime?: Date) => {
-    setShowTimePicker(false);
-    if (selectedTime) setScheduledTime(selectedTime);
-  };
-
-  const selectedServices = description
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const isServiceSelected = (serviceName: string) => {
-    const target = serviceName.trim().toLowerCase();
-    return selectedServices.some((s) => s.toLowerCase() === target);
-  };
-
-  const handleToggleService = (serviceName: string) => {
-    const target = serviceName.trim();
-    const isSelected = isServiceSelected(target);
-
-    let updated: string[];
-    if (isSelected) {
-      updated = selectedServices.filter(
-        (s) => s.toLowerCase() !== target.toLowerCase()
-      );
-    } else {
-      updated = [...selectedServices, target];
-    }
-
-    setDescription(updated.join(", "));
-  };
-
-  const handleSubmit = () => {
-    if (!clientName.trim()) {
-      Alert.alert("Error", "El nombre del cliente es obligatorio");
-      return;
-    }
-
-    const data: ServiceFormData = {
-      client_name: clientName.trim(),
-      address: address.trim(),
-      description: description.trim(),
-      scheduled_date: formatDate(scheduledDate),
-      scheduled_time: formatTime(scheduledTime),
-      notes: notes.trim(),
-      reminder_minutes: reminderMinutes,
-    };
-
-    onSubmit(data);
-  };
+  const form = useServiceForm({ initialValues, onSubmit });
 
   return (
     <View className="px-6 pt-2 pb-12 gap-2">
-      <Card>
-        {/* Client Name */}
-        <View className="mb-5 z-10">
-          <View className="flex-row items-center justify-between mb-2">
-            <View className="flex-row items-center gap-1.5">
-              <IconUser size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Cliente *
-              </Text>
-            </View>
-            {clientName.trim().length > 0 && !exactMatch && (
-              <Pressable
-                onPress={handleSaveClient}
-                className="flex-row items-center gap-1 active:opacity-50"
-              >
-                <IconStar size={14} color="#f59e0b" strokeWidth={2} />
-                <Text className="text-amber-500 font-sans text-[13px] font-medium">
-                  Guardar frecuente
+      {/* Client Card + floating dropdown */}
+      <View style={{ zIndex: 50 }}>
+        <Card>
+          {/* Client Name */}
+          <View className="mb-5">
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center gap-1.5">
+                <IconUser size={14} color="#343433" strokeWidth={2} />
+                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                  Cliente *
                 </Text>
-              </Pressable>
-            )}
-          </View>
-          <TextInput
-            value={clientName}
-            onChangeText={setClientName}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder="Nombre del cliente"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-            style={{ borderCurve: "continuous" }}
-            placeholderTextColor="#a7a7a7"
-          />
-
-          {/* Saved Clients Dropdown */}
-          {showDropdown && (
-            <View
-              className="absolute top-[76px] left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/40"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.1,
-                shadowRadius: 24,
-                elevation: 8,
+              </View>
+              {form.clientName.trim().length > 0 && !form.exactMatch && (
+                <Pressable
+                  onPress={form.handleSaveClient}
+                  className="flex-row items-center gap-1 active:opacity-50"
+                >
+                  <IconStar size={14} color="#f59e0b" strokeWidth={2} />
+                  <Text className="text-amber-500 font-sans text-[13px] font-medium">
+                    Guardar frecuente
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+            <TextInput
+              ref={(ref) => {
+                form.clientInputRef.current = ref;
               }}
-            >
-              <BlurView
-                intensity={40}
-                tint="light"
-                className="border border-white/60 rounded-2xl max-h-[220px]"
-              >
-                <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
-                  {filteredClients.map((client, index) => (
-                    <Pressable
-                      key={client.id}
-                      onPress={() => {
-                        setClientName(client.name);
-                        if (client.address) setAddress(client.address);
-                        setIsFocused(false);
-                      }}
-                      className={`px-4 py-3.5 active:bg-black/5 ${
-                        index !== filteredClients.length - 1
-                          ? "border-b border-black/5"
-                          : ""
-                      }`}
-                    >
-                      <Text className="font-sans text-[15px] text-charcoal-primary font-medium tracking-tight">
-                        {client.name}
-                      </Text>
-                      {client.address && (
-                        <Text
-                          className="font-sans text-[13px] text-graphite/70 mt-1"
-                          numberOfLines={1}
-                        >
-                          {client.address}
-                        </Text>
-                      )}
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </BlurView>
-            </View>
-          )}
-        </View>
-
-        {/* Address */}
-        <View className="mb-5">
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <IconMapPin size={14} color="#343433" strokeWidth={2} />
-            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-              Dirección
-            </Text>
+              value={form.clientName}
+              onChangeText={form.setClientName}
+              onFocus={form.handleClientFocus}
+              onBlur={form.handleClientBlur}
+              onLayout={(e) => {
+                const layout = e.nativeEvent.layout;
+                form.handleClientInputLayout(
+                  layout.y + layout.height,
+                  layout.x
+                );
+              }}
+              placeholder="Nombre del cliente"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+              style={{ borderCurve: "continuous" }}
+              placeholderTextColor="#a7a7a7"
+            />
           </View>
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            placeholder="Dirección del servicio"
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-            style={{ borderCurve: "continuous" }}
-            placeholderTextColor="#a7a7a7"
-          />
-        </View>
 
-        {/* Description / Services */}
-        <View className="mb-5">
-          <View className="flex-row items-center justify-between mb-2">
-            <View className="flex-row items-center gap-1.5">
-              <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
+          {/* Address */}
+          <View className="mb-5">
+            <View className="flex-row items-center gap-1.5 mb-2">
+              <IconMapPin size={14} color="#343433" strokeWidth={2} />
               <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Servicios
+                Dirección
               </Text>
             </View>
-            {selectedServices.length > 0 && (
-              <Text className="font-sans text-[12px] font-medium text-ash">
-                {selectedServices.length}{" "}
-                {selectedServices.length === 1 ? "seleccionado" : "seleccionados"}
-              </Text>
+            <TextInput
+              value={form.address}
+              onChangeText={form.setAddress}
+              placeholder="Dirección del servicio"
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+              style={{ borderCurve: "continuous" }}
+              placeholderTextColor="#a7a7a7"
+            />
+          </View>
+
+          {/* Description / Services */}
+          <View className="mb-5">
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center gap-1.5">
+                <IconAlignLeft size={14} color="#343433" strokeWidth={2} />
+                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                  Servicios
+                </Text>
+              </View>
+              {form.selectedServices.length > 0 && (
+                <Text className="font-sans text-[12px] font-medium text-ash">
+                  {form.selectedServices.length}{" "}
+                  {form.selectedServices.length === 1
+                    ? "seleccionado"
+                    : "seleccionados"}
+                </Text>
+              )}
+            </View>
+            <TextInput
+              value={form.description}
+              onChangeText={form.setDescription}
+              placeholder="Selecciona servicios o escribe aquí..."
+              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden mb-3"
+              style={{ borderCurve: "continuous" }}
+              placeholderTextColor="#a7a7a7"
+            />
+
+            {/* Default Services Pills - Multi-select */}
+            {form.defaultServices.length > 0 && (
+              <View className="flex-row flex-wrap gap-2">
+                {form.defaultServices.map((service) => {
+                  const isSelected = form.isServiceSelected(service.name);
+                  return (
+                    <Pressable
+                      key={service.id}
+                      onPress={() => form.handleToggleService(service.name)}
+                      className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border active:scale-95 ${
+                        isSelected
+                          ? "bg-midnight border-midnight"
+                          : "bg-stone-surface/60 border-stone-surface active:bg-stone-surface"
+                      }`}
+                      style={{ borderCurve: "continuous" }}
+                    >
+                      {isSelected && (
+                        <IconCheck
+                          size={13}
+                          color="#ffffff"
+                          strokeWidth={2.5}
+                        />
+                      )}
+                      <Text
+                        className={`font-sans text-[13px] ${
+                          isSelected
+                            ? "text-white font-semibold"
+                            : "text-charcoal-primary font-medium"
+                        }`}
+                      >
+                        {service.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             )}
           </View>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Selecciona servicios o escribe aquí..."
-            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden mb-3"
-            style={{ borderCurve: "continuous" }}
-            placeholderTextColor="#a7a7a7"
-          />
-          
-          {/* Default Services Pills - Multi-select */}
-          {defaultServices.length > 0 && (
-            <View className="flex-row flex-wrap gap-2">
-              {defaultServices.map((service) => {
-                const isSelected = isServiceSelected(service.name);
-                return (
-                  <Pressable
-                    key={service.id}
-                    onPress={() => handleToggleService(service.name)}
-                    className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border active:scale-95 ${
-                      isSelected 
-                        ? 'bg-midnight border-midnight' 
-                        : 'bg-stone-surface/60 border-stone-surface active:bg-stone-surface'
-                    }`}
-                    style={{ borderCurve: 'continuous' }}
-                  >
-                    {isSelected && (
-                      <IconCheck size={13} color="#ffffff" strokeWidth={2.5} />
-                    )}
-                    <Text className={`font-sans text-[13px] ${
-                      isSelected ? 'text-white font-semibold' : 'text-charcoal-primary font-medium'
-                    }`}>
-                      {service.name}
+        </Card>
+
+        {/* Floating Clients Dropdown — rendered outside Card to avoid overflow clip */}
+        {form.showDropdown && (
+          <View
+            className="absolute left-6 right-6 rounded-xl overflow-hidden bg-white"
+            style={{
+              top: form.clientInputLayout.y + 24 + 6,
+              zIndex: 999,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.15,
+              shadowRadius: 16,
+              elevation: 10,
+              borderCurve: "continuous",
+              borderWidth: 0.5,
+              borderColor: "rgba(0,0,0,0.08)",
+            }}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled
+              style={{ maxHeight: 220 }}
+            >
+              {form.filteredClients.map((client, index) => (
+                <Pressable
+                  key={client.id}
+                  onPress={() => form.handleSelectClient(client)}
+                  className="active:bg-stone-surface/60"
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    borderBottomWidth:
+                      index !== form.filteredClients.length - 1 ? 0.5 : 0,
+                    borderBottomColor: "rgba(0,0,0,0.06)",
+                  }}
+                >
+                  <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
+                    {client.name}
+                  </Text>
+                  {client.address && (
+                    <Text
+                      className="font-sans text-[13px] text-ash mt-0.5"
+                      numberOfLines={1}
+                    >
+                      {client.address}
                     </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-        </View>
-      </Card>
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </View>
 
       {/* Date & Time */}
       <Card>
@@ -379,22 +243,22 @@ export function ServiceForm({
             </View>
             {Platform.OS === "ios" ? (
               <DateTimePicker
-                value={scheduledDate}
+                value={form.scheduledDate}
                 mode="date"
                 display="inline"
-                onChange={onDateChange}
+                onChange={form.onDateChange}
                 minimumDate={new Date()}
                 style={{ alignSelf: "flex-start" }}
                 accentColor="green"
               />
             ) : (
               <Pressable
-                onPress={() => setShowDatePicker(true)}
+                onPress={() => form.setShowDatePicker(true)}
                 className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
                 style={{ borderCurve: "continuous" }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
-                  {formatDateForDisplay(scheduledDate)}
+                  {formatDateForDisplay(form.scheduledDate)}
                 </Text>
               </Pressable>
             )}
@@ -408,43 +272,43 @@ export function ServiceForm({
             </View>
             {Platform.OS === "ios" ? (
               <DateTimePicker
-                value={scheduledTime}
+                value={form.scheduledTime}
                 mode="time"
                 display="compact"
-                onChange={onTimeChange}
+                onChange={form.onTimeChange}
                 style={{ alignSelf: "flex-start" }}
                 accentColor="green"
               />
             ) : (
               <Pressable
-                onPress={() => setShowTimePicker(true)}
+                onPress={() => form.setShowTimePicker(true)}
                 className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
                 style={{ borderCurve: "continuous" }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
-                  {formatTimeForDisplay(scheduledTime)}
+                  {formatTimeForDisplay(form.scheduledTime)}
                 </Text>
               </Pressable>
             )}
           </View>
         </View>
 
-        {showDatePicker && Platform.OS === "android" && (
+        {form.showDatePicker && Platform.OS === "android" && (
           <DateTimePicker
-            value={scheduledDate}
+            value={form.scheduledDate}
             mode="date"
             display="default"
-            onChange={onDateChange}
+            onChange={form.onDateChange}
             minimumDate={new Date()}
           />
         )}
 
-        {showTimePicker && Platform.OS === "android" && (
+        {form.showTimePicker && Platform.OS === "android" && (
           <DateTimePicker
-            value={scheduledTime}
+            value={form.scheduledTime}
             mode="time"
             display="default"
-            onChange={onTimeChange}
+            onChange={form.onTimeChange}
             is24Hour={false}
           />
         )}
@@ -460,8 +324,8 @@ export function ServiceForm({
             </Text>
           </View>
           <TextInput
-            value={notes}
-            onChangeText={setNotes}
+            value={form.notes}
+            onChangeText={form.setNotes}
             placeholder="Notas adicionales..."
             multiline
             numberOfLines={3}
@@ -475,17 +339,17 @@ export function ServiceForm({
         {/* Reminder */}
         <View className="mb-8">
           <ReminderPicker
-            value={reminderMinutes}
-            onChange={setReminderMinutes}
-            scheduledDate={scheduledDate}
-            scheduledTime={scheduledTime}
+            value={form.reminderMinutes}
+            onChange={form.setReminderMinutes}
+            scheduledDate={form.scheduledDate}
+            scheduledTime={form.scheduledTime}
           />
         </View>
       </Card>
 
       {/* Save Button */}
       <Pressable
-        onPress={handleSubmit}
+        onPress={form.handleSubmit}
         disabled={saving}
         className={`rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden ${
           saving ? "bg-stone-surface" : "bg-midnight active:opacity-80"
