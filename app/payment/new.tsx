@@ -1,10 +1,9 @@
-import { View, Text, TextInput, ScrollView, Alert, Platform, Button } from "react-native";
+import { View, Text, TextInput, ScrollView, Alert, Platform, Button, Pressable } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { IconUser, IconCurrencyDollar, IconCalendar, IconFileText } from "@tabler/icons-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Card } from "@/components/Card";
 import { createPaymentDate } from "@/database/payments";
@@ -23,6 +22,8 @@ export default function NewPaymentScreen() {
 
   const [savedClients, setSavedClients] = useState<Client[]>([]);
   const [isFocused, setIsFocused] = useState(false);
+  const clientInputRef = useRef<TextInput>(null);
+  const [clientInputLayout, setClientInputLayout] = useState({ y: 0, x: 0 });
 
   useEffect(() => {
     const loadClients = async () => {
@@ -69,13 +70,10 @@ export default function NewPaymentScreen() {
         notes: notes.trim(),
       };
 
-      const result = await createPaymentDate(db, data);
-      if (!result.success) {
-        Alert.alert("Error", result.error?.message || "No se pudo guardar la fecha de pago");
-        return;
-      }
+      await createPaymentDate(db, data);
       router.back();
     } catch (error) {
+      console.error("Error creating payment date:", error);
       Alert.alert("Error", "No se pudo guardar la fecha de pago");
     } finally {
       setSaving(false);
@@ -101,89 +99,100 @@ export default function NewPaymentScreen() {
       <SafeAreaView className="flex-1 bg-warm-canvas" edges={["bottom", "left", "right"]}>
         <ScrollView keyboardShouldPersistTaps="handled">
           <View className="px-6 pt-4 pb-12 gap-2">
-            <Card>
-              {/* Client Name */}
-              <View className="mb-5 z-10">
-                <View className="flex-row items-center gap-1.5 mb-2">
-                  <IconUser size={14} color="#343433" strokeWidth={2} />
-                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                    Cliente *
-                  </Text>
-                </View>
-                <TextInput
-                  value={clientName}
-                  onChangeText={setClientName}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  placeholder="Nombre del cliente"
-                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-                  style={{ borderCurve: "continuous" }}
-                  placeholderTextColor="#a7a7a7"
-                />
-
-                {/* Saved Clients Dropdown */}
-                {showDropdown && (
-                  <View
-                    className="absolute top-[76px] left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/40"
-                    style={{
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 8 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 24,
-                      elevation: 8,
-                    }}
-                  >
-                    <BlurView
-                      intensity={40}
-                      tint="light"
-                      className="border border-white/60 rounded-2xl max-h-[220px]"
-                    >
-                      <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
-                        {filteredClients.map((client, index) => (
-                          <View
-                            key={client.id}
-                            className={`px-4 py-3.5 ${
-                              index !== filteredClients.length - 1
-                                ? "border-b border-black/5"
-                                : ""
-                            }`}
-                          >
-                            <Text
-                              className="font-sans text-[15px] text-charcoal-primary font-medium tracking-tight"
-                              onPress={() => {
-                                setClientName(client.name);
-                                setIsFocused(false);
-                              }}
-                            >
-                              {client.name}
-                            </Text>
-                          </View>
-                        ))}
-                      </ScrollView>
-                    </BlurView>
+            {/* Client + Amount Card with floating dropdown */}
+            <View style={{ zIndex: 50 }}>
+              <Card>
+                {/* Client Name */}
+                <View className="mb-5">
+                  <View className="flex-row items-center gap-1.5 mb-2">
+                    <IconUser size={14} color="#343433" strokeWidth={2} />
+                    <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                      Cliente *
+                    </Text>
                   </View>
-                )}
-              </View>
-
-              {/* Amount */}
-              <View className="mb-5">
-                <View className="flex-row items-center gap-1.5 mb-2">
-                  <IconCurrencyDollar size={14} color="#343433" strokeWidth={2} />
-                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                    Monto (Opcional)
-                  </Text>
+                  <TextInput
+                    ref={clientInputRef}
+                    value={clientName}
+                    onChangeText={setClientName}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                    onLayout={(e) => {
+                      const layout = e.nativeEvent.layout;
+                      setClientInputLayout({ y: layout.y + layout.height, x: layout.x });
+                    }}
+                    placeholder="Nombre del cliente"
+                    className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+                    style={{ borderCurve: "continuous" }}
+                    placeholderTextColor="#a7a7a7"
+                  />
                 </View>
-                <TextInput
-                  value={amount}
-                  onChangeText={setAmount}
-                  placeholder="0.00"
-                  keyboardType="decimal-pad"
-                  className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-                  style={{ borderCurve: "continuous" }}
-                  placeholderTextColor="#a7a7a7"
-                />
-              </View>
-            </Card>
+
+                {/* Amount */}
+                <View className="mb-5">
+                  <View className="flex-row items-center gap-1.5 mb-2">
+                    <IconCurrencyDollar size={14} color="#343433" strokeWidth={2} />
+                    <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+                      Monto (Opcional)
+                    </Text>
+                  </View>
+                  <TextInput
+                    value={amount}
+                    onChangeText={setAmount}
+                    placeholder="0.00"
+                    keyboardType="decimal-pad"
+                    className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+                    style={{ borderCurve: "continuous" }}
+                    placeholderTextColor="#a7a7a7"
+                  />
+                </View>
+              </Card>
+
+              {/* Floating Clients Dropdown */}
+              {showDropdown && (
+                <View
+                  className="absolute left-6 right-6 rounded-xl overflow-hidden bg-white"
+                  style={{
+                    top: clientInputLayout.y + 24 + 6,
+                    zIndex: 999,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 16,
+                    elevation: 10,
+                    borderCurve: "continuous",
+                    borderWidth: 0.5,
+                    borderColor: "rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    nestedScrollEnabled
+                    style={{ maxHeight: 220 }}
+                  >
+                    {filteredClients.map((client, index) => (
+                      <Pressable
+                        key={client.id}
+                        onPress={() => {
+                          setClientName(client.name);
+                          setIsFocused(false);
+                        }}
+                        className="active:bg-stone-surface/60"
+                        style={{
+                          paddingHorizontal: 16,
+                          paddingVertical: 12,
+                          borderBottomWidth: index !== filteredClients.length - 1 ? 0.5 : 0,
+                          borderBottomColor: "rgba(0,0,0,0.06)",
+                        }}
+                      >
+                        <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
+                          {client.name}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
 
             {/* Date */}
             <Card>
