@@ -6,6 +6,7 @@ interface CalendarDayProps {
   isSelected: boolean;
   hasServices: boolean;
   hasPayments?: boolean;
+  isDisabled?: boolean;
   onPress: (day: number) => void;
 }
 
@@ -15,19 +16,22 @@ export function CalendarDay({
   isSelected,
   hasServices,
   hasPayments = false,
+  isDisabled = false,
   onPress,
 }: CalendarDayProps) {
   const bgClass = isSelected
     ? 'bg-midnight'
     : isToday
     ? 'bg-stone-surface'
-    : hasServices
+    : hasServices && !isDisabled
     ? 'bg-ember-orange/15'
-    : hasPayments
+    : hasPayments && !isDisabled
     ? 'bg-valid-green/15'
     : 'bg-transparent';
 
-  const textClass = isSelected
+  const textClass = isDisabled
+    ? 'text-ash/50 font-medium'
+    : isSelected
     ? 'text-white font-bold'
     : isToday
     ? 'text-charcoal-primary font-bold'
@@ -39,8 +43,9 @@ export function CalendarDay({
 
   return (
     <Pressable
-      onPress={() => onPress(day)}
-      className={`w-10 h-10 rounded-full items-center justify-center mx-auto overflow-hidden ${bgClass} active:scale-95`}
+      onPress={() => !isDisabled && onPress(day)}
+      disabled={isDisabled}
+      className={`w-10 h-10 rounded-full items-center justify-center mx-auto overflow-hidden ${bgClass} ${!isDisabled ? 'active:scale-95' : ''}`}
       style={{ borderCurve: 'continuous' }}
     >
       <Text className={`font-sans text-[15px] tracking-tight ${textClass}`}>{day}</Text>

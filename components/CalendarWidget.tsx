@@ -15,22 +15,26 @@ interface CalendarWidgetProps {
   currentYear: number;
   currentMonth: number;
   selectedDate: string;
-  serviceDates: string[];
+  serviceDates?: string[];
   paymentDates?: string[];
-  todayISO: string;
+  todayISO?: string;
+  minDate?: string;
   onMonthChange: (year: number, month: number) => void;
   onDateSelect: (date: string) => void;
+  hideCardWrapper?: boolean;
 }
 
 export function CalendarWidget({
   currentYear,
   currentMonth,
   selectedDate,
-  serviceDates,
+  serviceDates = [],
   paymentDates = [],
   todayISO,
+  minDate,
   onMonthChange,
   onDateSelect,
+  hideCardWrapper = false,
 }: CalendarWidgetProps) {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -64,8 +68,8 @@ export function CalendarWidget({
   for (let i = 0; i < firstDay; i++) calendarDays.push(null);
   for (let d = 1; d <= daysInMonth; d++) calendarDays.push(d);
 
-  return (
-    <Card>
+  const content = (
+    <>
       {/* Month Navigation */}
       <View className="flex-row items-center justify-between pb-4">
         <Pressable
@@ -104,6 +108,7 @@ export function CalendarWidget({
               <CalendarDay
                 day={day}
                 isToday={
+                  todayISO !== undefined &&
                   formatDateISO(new Date(currentYear, currentMonth - 1, day)) ===
                   todayISO
                 }
@@ -123,6 +128,10 @@ export function CalendarWidget({
                     "0"
                   )}-${String(day).padStart(2, "0")}`
                 )}
+                isDisabled={
+                  minDate !== undefined &&
+                  `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}` < minDate
+                }
                 onPress={handleDayPress}
               />
             ) : (
@@ -131,6 +140,12 @@ export function CalendarWidget({
           </View>
         ))}
       </View>
-    </Card>
+    </>
   );
+
+  if (hideCardWrapper) {
+    return <View>{content}</View>;
+  }
+
+  return <Card>{content}</Card>;
 }

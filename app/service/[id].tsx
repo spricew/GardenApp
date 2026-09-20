@@ -7,18 +7,22 @@ import {
   ActivityIndicator,
   ActionSheetIOS,
   Platform,
+  Modal,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
-import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots } from '@tabler/icons-react-native';
+import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots, IconCalendarPlus, IconCurrencyDollar } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
+
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/Card";
+import { CalendarWidget } from "@/components/CalendarWidget";
 import {
   getServiceById,
   updateServiceStatus,
   updateServiceNotificationId,
   deleteService,
+  postponeService,
 } from "@/database/services";
 import {
   cancelServiceReminder,
@@ -53,6 +57,16 @@ export default function ServiceDetailScreen() {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Postpone modal state
+  const [showPostponeModal, setShowPostponeModal] = useState(false);
+  
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
+  const [postponeDateStr, setPostponeDateStr] = useState(todayISO);
+
   const loadService = useCallback(async () => {
     if (!id) return;
     setLoading(true);
@@ -76,6 +90,23 @@ export default function ServiceDetailScreen() {
 
   const handleStatusChange = async (newStatus: ServiceStatus) => {
     if (!service) return;
+
+    if (newStatus === "postponed") {
+      const parts = service.scheduled_date.split('-');
+      const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      dateObj.setDate(dateObj.getDate() + 1);
+      const nextDayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}-${String(dateObj.getDate()).padStart(2, "0")}`;
+      
+      const defaultDate = todayISO > nextDayStr ? todayISO : nextDayStr;
+      const defaultDateObj = new Date(defaultDate + "T12:00:00");
+      
+      setPostponeDateStr(defaultDate);
+      setCurrentYear(defaultDateObj.getFullYear());
+      setCurrentMonth(defaultDateObj.getMonth() + 1);
+      setShowPostponeModal(true);
+      return;
+    }
+
     try {
       const updateResult = await updateServiceStatus(db, service.id, newStatus);
       if (!updateResult.success) {
@@ -94,6 +125,30 @@ export default function ServiceDetailScreen() {
       await loadService();
     } catch (error) {
       Alert.alert("Error", "No se pudo actualizar el estado");
+    }
+  };
+
+  const handleConfirmPostpone = async () => {
+    if (!service) return;
+    setShowPostponeModal(false);
+
+    try {
+      // Cancel existing reminder for the original service
+      if (service.notification_id) {
+        await cancelServiceReminder(service.notification_id);
+        await updateServiceNotificationId(db, service.id, null);
+      }
+
+      const result = await postponeService(db, service.id, postponeDateStr);
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo posponer el servicio");
+        return;
+      }
+
+      // Navigate back — the list will refresh via useFocusEffect
+      router.back();
+    } catch (error) {
+      Alert.alert("Error", "No se pudo posponer el servicio");
     }
   };
 
@@ -295,6 +350,18 @@ export default function ServiceDetailScreen() {
                   {reminderDisplay}
                 </Text>
               </View>
+
+              {service.expense !== null && service.expense !== undefined ? (
+                <View className="flex-row items-center">
+                  <View className="flex-row items-center gap-1.5 w-28">
+                    <IconCurrencyDollar size={14} color="#848281" strokeWidth={2} />
+                    <Text className="font-sans text-[14px] text-ash">Gasto extra</Text>
+                  </View>
+                  <Text className="font-sans text-[15px] text-graphite flex-1 font-medium text-emerald-600">
+                    ${service.expense.toFixed(2)}
+                  </Text>
+                </View>
+              ) : null}
             </View>
           </Card>
 
@@ -352,6 +419,79 @@ export default function ServiceDetailScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+
+      {/* Postpone Modal */}
+      <Modal
+        visible={showPostponeModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPostponeModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/30"
+          onPress={() => setShowPostponeModal(false)}
+        />
+        <View
+          className="bg-white rounded-t-[32px] px-6 pt-6 pb-10"
+          style={{ borderCurve: "continuous" }}
+        >
+          {/* Handle */}
+          <View className="w-10 h-1 bg-stone-surface rounded-full self-center mb-5" />
+
+          <View className="flex-row items-center gap-2 mb-1">
+            <IconCalendarPlus size={20} color="#ff3e00" strokeWidth={2} />
+            <Text className="font-sans font-semibold text-[19px] text-charcoal-primary tracking-tight">
+              Posponer servicio
+            </Text>
+          </View>
+          <Text className="font-sans text-[14px] text-ash mb-5">
+            El servicio actual quedará marcado como pospuesto y se creará uno nuevo en la fecha seleccionada.
+          </Text>
+
+          <View className="mb-4">
+            <CalendarWidget
+              currentYear={currentYear}
+              currentMonth={currentMonth}
+              selectedDate={postponeDateStr}
+              todayISO={todayISO}
+              minDate={service?.scheduled_date ? (() => {
+                const parts = service.scheduled_date.split('-');
+                const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                d.setDate(d.getDate() + 1);
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+              })() : undefined}
+              onMonthChange={(year, month) => {
+                setCurrentYear(year);
+                setCurrentMonth(month);
+              }}
+              onDateSelect={(date) => setPostponeDateStr(date)}
+              hideCardWrapper
+            />
+          </View>
+
+          {/* Confirm button */}
+          <Pressable
+            onPress={handleConfirmPostpone}
+            className="mt-4 bg-midnight rounded-full py-4 items-center justify-center flex-row gap-2 overflow-hidden active:opacity-80"
+            style={{ borderCurve: "continuous" }}
+          >
+            <IconCalendarPlus size={17} color="#ffffff" strokeWidth={2.2} />
+            <Text className="font-sans font-semibold text-[15px] text-white tracking-tight">
+              Confirmar y posponer
+            </Text>
+          </Pressable>
+
+          {/* Cancel */}
+          <Pressable
+            onPress={() => setShowPostponeModal(false)}
+            className="mt-2 py-3 items-center active:opacity-50"
+          >
+            <Text className="font-sans text-[15px] text-ash font-medium">
+              Cancelar
+            </Text>
+          </Pressable>
+        </View>
+      </Modal>
     </>
   );
 }
