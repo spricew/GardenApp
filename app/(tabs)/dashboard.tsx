@@ -122,7 +122,7 @@ function RankedList({
 function EmptyState({ title, description, color }: { title: string; description: string; color: string }) {
   return (
     <View className="items-center justify-center py-16 bg-[#f8f7f4] rounded-[12px] mt-4 mb-8 mx-1">
-      <View 
+      <View
         className="w-[72px] h-[72px] rounded-[72px] items-center justify-center mb-6"
         style={{ backgroundColor: color }}
       >
@@ -186,9 +186,9 @@ export default function DashboardScreen() {
             >
               <IconChevronLeft size={20} color="#343433" strokeWidth={2.5} />
             </Pressable>
-            
+
             <View className="items-center">
-              <Text className="font-display font-medium text-[44px] text-[#343433] tracking-[-1.14px] capitalize leading-[48px]">
+              <Text className="font-display font-medium text-heading text-[#343433] tracking-[-1.14px] capitalize">
                 {getMonthName(currentMonth)}
               </Text>
               <Text className="font-sans text-[17px] text-[#848281] tracking-[-0.22px] mt-1">
@@ -213,17 +213,15 @@ export default function DashboardScreen() {
                 <Pressable
                   key={cat.value}
                   onPress={() => setCategory(cat.value)}
-                  className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-[32px] ${
-                    isActive ? "bg-[#121212]" : "bg-[#f6f4ef]"
-                  } active:scale-[0.98]`}
+                  className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-[32px] ${isActive ? "bg-[#121212]" : "bg-[#f6f4ef]"
+                    } active:scale-[0.98]`}
                 >
                   {isActive && (
                     <CIcon size={16} color="#ffffff" strokeWidth={2.5} />
                   )}
                   <Text
-                    className={`font-sans text-[14px] font-medium tracking-[-0.18px] ${
-                      isActive ? "text-[#ffffff]" : "text-[#121212]"
-                    }`}
+                    className={`font-sans text-[14px] font-medium tracking-[-0.18px] ${isActive ? "text-[#ffffff]" : "text-[#121212]"
+                      }`}
                   >
                     {cat.label}
                   </Text>
@@ -243,13 +241,13 @@ export default function DashboardScreen() {
               {category === "services" && (
                 <>
                   {serviceStats.total === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                       title="Sin servicios este mes"
                       description="Los datos aparecerán cuando registres servicios en el mes seleccionado."
                       color="#ff3e00"
                     />
                   ) : (
-                    <>
+                    <View className='gap-y-2'>
                       <Card title="Resumen de Servicios">
                         <View>
                           <StatRow label="Total de servicios" value={String(serviceStats.total)} />
@@ -290,7 +288,7 @@ export default function DashboardScreen() {
                           iconColor="#00ca48"
                         />
                       </Card>
-                    </>
+                    </View>
                   )}
                 </>
               )}
@@ -299,13 +297,14 @@ export default function DashboardScreen() {
               {category === "payments" && (
                 <>
                   {paymentStats.total === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                       title="Sin cobros este mes"
                       description="Los datos aparecerán cuando haya cobros registrados."
                       color="#00ca48"
                     />
                   ) : (
-                    <>
+                    <View className='gap-y-2'>
+
                       <Card title="Resumen de Cobros">
                         <View>
                           <StatRow label="Total de cobros" value={String(paymentStats.total)} />
@@ -323,7 +322,7 @@ export default function DashboardScreen() {
                           iconColor="#0090ff"
                         />
                       </Card>
-                    </>
+                    </View>
                   )}
                 </>
               )}
@@ -332,13 +331,13 @@ export default function DashboardScreen() {
               {category === "expenses" && (
                 <>
                   {expenseStats.servicesWithExpense === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                       title="Sin gastos este mes"
                       description="Los datos aparecerán cuando registres gastos en servicios."
                       color="#0090ff"
                     />
                   ) : (
-                    <>
+                    <View className='gap-y-2'>
                       <Card title="Resumen de Inversión">
                         <View>
                           <StatRow label="Gasto total" value={`$${expenseStats.totalExpense.toFixed(2)}`} color="text-[#ff2b3a]" />
@@ -371,7 +370,7 @@ export default function DashboardScreen() {
                           iconColor="#00ca48"
                         />
                       </Card>
-                    </>
+                    </View>
                   )}
                 </>
               )}
