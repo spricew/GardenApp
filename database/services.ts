@@ -35,8 +35,8 @@ export async function getServiceById(db: SQLiteDatabase, id: number): Promise<Da
 export async function createService(db: SQLiteDatabase, data: ServiceFormData): Promise<DatabaseResult<number>> {
   try {
     const result = await db.runAsync(
-      `INSERT INTO services (client_name, address, description, scheduled_date, scheduled_time, notes, reminder_minutes)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO services (client_name, address, description, scheduled_date, scheduled_time, notes, reminder_minutes, expense)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.client_name,
         data.address || null,
@@ -45,6 +45,7 @@ export async function createService(db: SQLiteDatabase, data: ServiceFormData): 
         data.scheduled_time || null,
         data.notes || null,
         data.reminder_minutes,
+        data.expense !== undefined ? data.expense : null,
       ]
     );
     return createDatabaseResult(result.lastInsertRowId);
@@ -77,6 +78,7 @@ export async function updateService(db: SQLiteDatabase, id: number, data: Partia
     if (data.scheduled_time !== undefined) { fields.push('scheduled_time = ?'); values.push(data.scheduled_time || null); }
     if (data.notes !== undefined) { fields.push('notes = ?'); values.push(data.notes || null); }
     if (data.reminder_minutes !== undefined) { fields.push('reminder_minutes = ?'); values.push(data.reminder_minutes); }
+    if (data.expense !== undefined) { fields.push('expense = ?'); values.push(data.expense !== null ? data.expense : null); }
 
     if (fields.length === 0) return createDatabaseResult(undefined);
 
@@ -119,5 +121,53 @@ export async function getServiceDatesInMonth(db: SQLiteDatabase, year: number, m
     return createDatabaseResult(rows.map((r) => r.scheduled_date));
   } catch (error) {
     return createDatabaseError('DB_ERROR', 'Error al obtener fechas de servicios', error);
+  }
+}
+
+/**
+ * Postpones a service: marks the original as 'postponed' and creates a new
+ * clone with the given scheduled date (and optional time).
+ * Returns the ID of the newly created service.
+ */
+export async function postponeService(
+  db: SQLiteDatabase,
+  originalId: number,
+  newDate: string,
+  newTime?: string | null
+): Promise<DatabaseResult<number>> {
+  try {
+    const originalResult = await db.getFirstAsync<Service>(
+      'SELECT * FROM services WHERE id = ?',
+      [originalId]
+    );
+    if (!originalResult) {
+      return createDatabaseError('NOT_FOUND', 'Servicio original no encontrado');
+    }
+
+    // Mark original as postponed
+    await db.runAsync(
+      "UPDATE services SET status = 'postponed', updated_at = datetime('now', 'localtime') WHERE id = ?",
+      [originalId]
+    );
+
+    // Clone into a new pending service with the new date/time
+    const insert = await db.runAsync(
+      `INSERT INTO services
+         (client_name, address, description, scheduled_date, scheduled_time, notes, reminder_minutes)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        originalResult.client_name,
+        originalResult.address ?? null,
+        originalResult.description ?? null,
+        newDate,
+        newTime ?? originalResult.scheduled_time ?? null,
+        originalResult.notes ?? null,
+        originalResult.reminder_minutes,
+      ]
+    );
+
+    return createDatabaseResult(insert.lastInsertRowId);
+  } catch (error) {
+    return createDatabaseError('DB_ERROR', 'Error al posponer servicio', error);
   }
 }

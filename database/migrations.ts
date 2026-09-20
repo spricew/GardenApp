@@ -39,4 +39,13 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   } catch {
     // Column already exists — ignore
   }
+
+  // Add expense column if missing (upgrade path)
+  try {
+    await db.execAsync(
+      `ALTER TABLE services ADD COLUMN expense REAL;`
+    );
+  } catch {
+    // Column already exists — ignore
+  }
 }

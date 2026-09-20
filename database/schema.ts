@@ -11,6 +11,7 @@ export const CREATE_SERVICES_TABLE = `
     reminder_minutes INTEGER DEFAULT 30,
     notification_id TEXT,
     recurring_service_id INTEGER,
+    expense REAL,
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (recurring_service_id) REFERENCES recurring_services(id)

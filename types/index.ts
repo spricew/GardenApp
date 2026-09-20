@@ -12,6 +12,7 @@ export interface Service {
   reminder_minutes: number;
   notification_id: string | null;
   recurring_service_id: number | null;
+  expense: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export interface ServiceFormData {
   scheduled_time: string;
   notes: string;
   reminder_minutes: number;
+  expense: number | null;
 }
 
 export interface PaymentDate {
