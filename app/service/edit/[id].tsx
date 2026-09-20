@@ -35,6 +35,7 @@ export default function EditServiceScreen() {
           description: service.description || "",
           notes: service.notes || "",
           reminder_minutes: service.reminder_minutes,
+          expense: service.expense !== null ? String(service.expense) : "",
           scheduled_date: dateObj,
           scheduled_time: dateObj,
         });

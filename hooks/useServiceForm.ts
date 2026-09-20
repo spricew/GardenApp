@@ -17,6 +17,7 @@ export interface ServiceFormValues {
   scheduled_time: Date;
   notes: string;
   reminder_minutes: number;
+  expense: string;
 }
 
 interface UseServiceFormOptions {
@@ -66,6 +67,7 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   const [address, setAddress] = useState(initialValues?.address || "");
   const [description, setDescription] = useState(initialValues?.description || "");
   const [notes, setNotes] = useState(initialValues?.notes || "");
+  const [expense, setExpense] = useState(initialValues?.expense || "");
   const [reminderMinutes, setReminderMinutes] = useState(
     initialValues?.reminder_minutes ?? 2880
   );
@@ -221,10 +223,11 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
       scheduled_time: formatTime(scheduledTime),
       notes: notes.trim(),
       reminder_minutes: reminderMinutes,
+      expense: expense.trim() ? parseFloat(expense.trim()) : null,
     };
 
     onSubmit(data);
-  }, [clientName, address, description, scheduledDate, scheduledTime, notes, reminderMinutes, onSubmit]);
+  }, [clientName, address, description, scheduledDate, scheduledTime, notes, reminderMinutes, expense, onSubmit]);
 
   // ── Return ────────────────────────────────────────────────────────────────
 
@@ -238,6 +241,8 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
     setDescription,
     notes,
     setNotes,
+    expense,
+    setExpense,
     reminderMinutes,
     setReminderMinutes,
     scheduledDate,

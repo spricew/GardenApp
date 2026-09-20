@@ -15,6 +15,7 @@ import {
   IconFileText,
   IconCheck,
   IconStar,
+  IconCurrencyDollar,
 } from "@tabler/icons-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -317,8 +318,28 @@ export function ServiceForm({
         )}
       </Card>
 
-      {/* Notes */}
+      {/* Extra Expenses / Notes */}
       <Card>
+        {/* Expense */}
+        <View className="mb-5">
+          <View className="flex-row items-center gap-1.5 mb-2">
+            <IconCurrencyDollar size={14} color="#343433" strokeWidth={2} />
+            <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
+              Gastos extra / Inversión
+            </Text>
+          </View>
+          <TextInput
+            value={form.expense}
+            onChangeText={form.setExpense}
+            placeholder="Ej. 150.00 (gasolina, materiales...)"
+            keyboardType="decimal-pad"
+            className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
+            style={{ borderCurve: "continuous" }}
+            placeholderTextColor="#a7a7a7"
+          />
+        </View>
+
+        {/* Notes */}
         <View className="mb-5">
           <View className="flex-row items-center gap-1.5 mb-2">
             <IconFileText size={14} color="#343433" strokeWidth={2} />
