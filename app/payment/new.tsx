@@ -1,6 +1,6 @@
 import { View, Text, TextInput, ScrollView, Alert, Platform, Button, Pressable } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { IconUser, IconCurrencyDollar, IconCalendar, IconFileText } from "@tabler/icons-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,8 +22,7 @@ export default function NewPaymentScreen() {
 
   const [savedClients, setSavedClients] = useState<Client[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const clientInputRef = useRef<TextInput>(null);
-  const [clientInputLayout, setClientInputLayout] = useState({ y: 0, x: 0 });
+  const [clientInputBottom, setClientInputBottom] = useState(0);
 
   useEffect(() => {
     const loadClients = async () => {
@@ -70,10 +69,13 @@ export default function NewPaymentScreen() {
         notes: notes.trim(),
       };
 
-      await createPaymentDate(db, data);
+      const result = await createPaymentDate(db, data);
+      if (!result.success) {
+        Alert.alert("Error", result.error?.message || "No se pudo guardar la fecha de pago");
+        return;
+      }
       router.back();
-    } catch (error) {
-      console.error("Error creating payment date:", error);
+    } catch {
       Alert.alert("Error", "No se pudo guardar la fecha de pago");
     } finally {
       setSaving(false);
@@ -111,14 +113,13 @@ export default function NewPaymentScreen() {
                     </Text>
                   </View>
                   <TextInput
-                    ref={clientInputRef}
                     value={clientName}
                     onChangeText={setClientName}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                     onLayout={(e) => {
                       const layout = e.nativeEvent.layout;
-                      setClientInputLayout({ y: layout.y + layout.height, x: layout.x });
+                      setClientInputBottom(layout.y + layout.height);
                     }}
                     placeholder="Nombre del cliente"
                     className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
@@ -152,7 +153,7 @@ export default function NewPaymentScreen() {
                 <View
                   className="absolute left-6 right-6 rounded-xl bg-white"
                   style={{
-                    top: clientInputLayout.y + 24 + 6,
+                    top: clientInputBottom + 24 + 6,
                     zIndex: 999,
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 10 },
