@@ -69,8 +69,3 @@ export async function cancelServiceReminder(notificationId: string | null): Prom
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   }
 }
-
-export async function rescheduleReminder(service: Service): Promise<string | null> {
-  await cancelServiceReminder(service.notification_id);
-  return await scheduleServiceReminder(service);
-}

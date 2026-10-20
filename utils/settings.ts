@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const SETTINGS_KEYS = {
+const SETTINGS_KEYS = {
   DEFAULT_REMINDER: 'default_reminder',
 };
 
