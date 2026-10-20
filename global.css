@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .border-continuous {
-    border-curve: continuous;
-  }
-  .squircle {
-    border-curve: continuous;
-  }
-}
-
 @layer base {
   :root {
     /* Colors */

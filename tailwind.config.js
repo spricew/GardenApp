@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./types/**/*.{js,jsx,ts,tsx}",
+  ],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
@@ -27,26 +31,6 @@ module.exports = {
         'violet-pop': 'var(--color-violet-pop)',
         'coral-red': 'var(--color-coral-red)',
         'valid-green': 'var(--color-valid-green)',
-        garden: {
-          50: '#FEFAE0',
-          100: '#E9F5DB',
-          200: '#B7E4C7',
-          300: '#95D5B2',
-          400: '#74C69D',
-          500: '#52B788',
-          600: '#40916C',
-          700: '#2D6A4F',
-          800: '#1B4332',
-          900: '#081C15',
-        },
-        cream: {
-          50: '#FEFAE0',
-          100: '#FEFCE8',
-        },
-        accent: {
-          400: '#DDA15E',
-          500: '#BC6C25',
-        },
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -62,16 +46,4 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    ({ addUtilities }) => {
-      addUtilities({
-        '.border-continuous': {
-          borderCurve: 'continuous',
-        },
-        '.squircle': {
-          borderCurve: 'continuous',
-        },
-      });
-    },
-  ],
 };
