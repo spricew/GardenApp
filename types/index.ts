@@ -73,7 +73,7 @@ export interface DefaultService {
   name: string;
 }
 
-export interface AppError {
+interface AppError {
   code: string;
   message: string;
   details?: unknown;
@@ -85,7 +85,7 @@ export interface DatabaseResult<T> {
   error?: AppError;
 }
 
-export type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
+type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
 
 export const STATUS_CONFIG: Record<
   ServiceStatus,
@@ -115,7 +115,7 @@ export const REMINDER_OPTIONS = [
   { label: '1 semana antes', value: 10080 },
 ];
 
-export function createAppError(code: string, message: string, details?: unknown): AppError {
+function createAppError(code: string, message: string, details?: unknown): AppError {
   return { code, message, details };
 }
 
