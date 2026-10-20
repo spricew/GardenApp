@@ -2,29 +2,6 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import type { PaymentDate, PaymentDateFormData, DatabaseResult } from "@/types";
 import { createDatabaseResult, createDatabaseError } from "@/types";
 
-export async function getAllPaymentDates(db: SQLiteDatabase): Promise<DatabaseResult<PaymentDate[]>> {
-  try {
-    const data = await db.getAllAsync<PaymentDate>(
-      `SELECT * FROM payment_dates ORDER BY estimated_date ASC;`
-    );
-    return createDatabaseResult(data);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al obtener fechas de pago', error);
-  }
-}
-
-export async function getPaymentDateById(db: SQLiteDatabase, id: number): Promise<DatabaseResult<PaymentDate | null>> {
-  try {
-    const data = await db.getFirstAsync<PaymentDate>(
-      `SELECT * FROM payment_dates WHERE id = ?;`,
-      [id]
-    );
-    return createDatabaseResult(data);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al obtener fecha de pago', error);
-  }
-}
-
 export async function createPaymentDate(db: SQLiteDatabase, data: PaymentDateFormData): Promise<DatabaseResult<number>> {
   try {
     const result = await db.runAsync(

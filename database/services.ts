@@ -2,15 +2,6 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Service, ServiceFormData, ServiceStatus, DatabaseResult } from "@/types";
 import { createDatabaseResult, createDatabaseError } from "@/types";
 
-export async function getAllServices(db: SQLiteDatabase): Promise<DatabaseResult<Service[]>> {
-  try {
-    const data = await db.getAllAsync<Service>('SELECT * FROM services ORDER BY scheduled_date ASC, scheduled_time ASC');
-    return createDatabaseResult(data);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al obtener servicios', error);
-  }
-}
-
 export async function getServicesByDate(db: SQLiteDatabase, date: string): Promise<DatabaseResult<Service[]>> {
   try {
     const data = await db.getAllAsync<Service>(

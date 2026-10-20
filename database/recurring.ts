@@ -6,7 +6,7 @@ import { scheduleServiceReminder } from "@/utils/notifications";
 /**
  * Get all active recurring services.
  */
-export async function getActiveRecurringServices(db: SQLiteDatabase): Promise<RecurringService[]> {
+async function getActiveRecurringServices(db: SQLiteDatabase): Promise<RecurringService[]> {
   return await db.getAllAsync<RecurringService>(
     'SELECT * FROM recurring_services WHERE is_active = 1'
   );
@@ -52,7 +52,7 @@ function getOccurrences(recurring: RecurringService, untilDate: Date): string[] 
  * Generate individual service entries for all active recurring services.
  * Looks ahead `weeksAhead` weeks from today.
  */
-export async function generateRecurringServices(
+async function generateRecurringServices(
   db: SQLiteDatabase,
   weeksAhead: number = 26
 ): Promise<number> {
@@ -107,7 +107,7 @@ export async function generateRecurringServices(
  * Pattern: every Saturday, biweekly (1 on, 1 off), starting 2026-08-29.
  * Reminder: 1 week before (10080 minutes).
  */
-export async function seedDonAlex(db: SQLiteDatabase): Promise<void> {
+async function seedDonAlex(db: SQLiteDatabase): Promise<void> {
   const existing = await db.getFirstAsync<{ count: number }>(
     "SELECT COUNT(*) as count FROM recurring_services WHERE client_name = 'Don Alex'"
   );
