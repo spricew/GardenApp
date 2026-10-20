@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Alert, TextInput } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
@@ -27,14 +27,14 @@ interface UseServiceFormOptions {
 
 // ── Formatters ─────────────────────────────────────────────────────────────────
 
-export const formatDate = (date: Date): string => {
+const formatDate = (date: Date): string => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
     "0"
   )}-${String(date.getDate()).padStart(2, "0")}`;
 };
 
-export const formatTime = (date: Date): string => {
+const formatTime = (date: Date): string => {
   return `${String(date.getHours()).padStart(2, "0")}:${String(
     date.getMinutes()
   ).padStart(2, "0")}`;
@@ -84,8 +84,7 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   const [isFocused, setIsFocused] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const clientInputRef = useRef<TextInput>(null);
-  const [clientInputLayout, setClientInputLayout] = useState({ y: 0, x: 0 });
+  const [clientInputBottom, setClientInputBottom] = useState(0);
 
   // ── Data loading ───────────────────────────────────────────────────────────
 
@@ -151,7 +150,7 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   );
 
   const handleClientInputLayout = useCallback(
-    (y: number, x: number) => setClientInputLayout({ y, x }),
+    (bottom: number) => setClientInputBottom(bottom),
     []
   );
 
@@ -249,12 +248,10 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
     scheduledTime,
 
     // Client autocomplete
-    savedClients,
     filteredClients,
     exactMatch,
     showDropdown,
-    clientInputRef,
-    clientInputLayout,
+    clientInputBottom,
     handleSaveClient,
     handleSelectClient,
     handleClientFocus,

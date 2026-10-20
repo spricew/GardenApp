@@ -6,17 +6,14 @@ import { getServicesInMonth, getPaymentsInMonth } from "@/database/stats";
 
 // ── Derived stat types ──────────────────────────────────────────────────────
 
-export interface ServiceStats {
+interface ServiceStats {
   total: number;
   byStatus: Record<ServiceStatus, number>;
-  totalExpense: number;
-  avgExpense: number;
-  servicesWithExpense: number;
   topClients: { name: string; count: number }[];
   topServices: { name: string; count: number }[];
 }
 
-export interface PaymentStats {
+interface PaymentStats {
   total: number;
   totalAmount: number;
   paidCount: number;
@@ -26,7 +23,7 @@ export interface PaymentStats {
   topClients: { name: string; total: number }[];
 }
 
-export interface ExpenseStats {
+interface ExpenseStats {
   totalExpense: number;
   servicesWithExpense: number;
   avgExpense: number;
@@ -74,17 +71,11 @@ export function useDashboardStats(year: number, month: number) {
       done: 0,
       not_done: 0,
     };
-    let totalExpense = 0;
-    let servicesWithExpense = 0;
     const clientMap = new Map<string, number>();
     const serviceMap = new Map<string, number>();
 
     for (const s of services) {
       byStatus[s.status]++;
-      if (s.expense !== null && s.expense > 0) {
-        totalExpense += s.expense;
-        servicesWithExpense++;
-      }
       clientMap.set(s.client_name, (clientMap.get(s.client_name) || 0) + 1);
       if (s.description) {
         const names = s.description.split(",").map((n) => n.trim()).filter(Boolean);
@@ -107,9 +98,6 @@ export function useDashboardStats(year: number, month: number) {
     return {
       total: services.length,
       byStatus,
-      totalExpense,
-      avgExpense: servicesWithExpense > 0 ? totalExpense / servicesWithExpense : 0,
-      servicesWithExpense,
       topClients,
       topServices,
     };
