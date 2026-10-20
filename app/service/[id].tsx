@@ -10,8 +10,8 @@ import {
   Modal,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { useState, useEffect, useCallback } from "react";
-import { IconArrowLeft, IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots, IconCalendarPlus, IconCurrencyDollar } from '@tabler/icons-react-native';
+import { useState, useCallback } from "react";
+import { IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots, IconCalendarPlus, IconCurrencyDollar } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 
 import { StatusBadge } from "@/components/StatusBadge";
@@ -24,10 +24,7 @@ import {
   deleteService,
   postponeService,
 } from "@/database/services";
-import {
-  cancelServiceReminder,
-  rescheduleReminder,
-} from "@/utils/notifications";
+import { cancelServiceReminder } from "@/utils/notifications";
 import { formatDateDisplay, formatTimeDisplay } from "@/utils/dates";
 import type { Service, ServiceStatus } from "@/types";
 import { STATUS_CONFIG } from "@/types";

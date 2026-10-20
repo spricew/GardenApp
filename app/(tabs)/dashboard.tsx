@@ -26,10 +26,10 @@ import type { ServiceStatus } from "@/types";
 
 type DashboardCategory = "services" | "payments" | "expenses";
 
-const CATEGORIES: { value: DashboardCategory; label: string; icon: typeof IconHammer; color: string }[] = [
-  { value: "services", label: "Servicios", icon: IconHammer, color: "#ff3e00" }, // Ember Orange
-  { value: "payments", label: "Cobros", icon: IconReceipt2, color: "#00ca48" }, // Meadow Green
-  { value: "expenses", label: "Inversión", icon: IconCurrencyDollar, color: "#0090ff" }, // Sky Blue
+const CATEGORIES: { value: DashboardCategory; label: string; icon: typeof IconHammer }[] = [
+  { value: "services", label: "Servicios", icon: IconHammer },
+  { value: "payments", label: "Cobros", icon: IconReceipt2 },
+  { value: "expenses", label: "Inversión", icon: IconCurrencyDollar },
 ];
 
 // ── Status icons map ────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ function RankedList({
 
   return (
     <View className="gap-5">
-      {items.map((item, i) => (
+      {items.map((item) => (
         <View key={item.name} className="gap-2.5">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-3 flex-1">

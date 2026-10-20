@@ -73,19 +73,13 @@ export function ServiceForm({
               )}
             </View>
             <TextInput
-              ref={(ref) => {
-                form.clientInputRef.current = ref;
-              }}
               value={form.clientName}
               onChangeText={form.setClientName}
               onFocus={form.handleClientFocus}
               onBlur={form.handleClientBlur}
               onLayout={(e) => {
                 const layout = e.nativeEvent.layout;
-                form.handleClientInputLayout(
-                  layout.y + layout.height,
-                  layout.x
-                );
+                form.handleClientInputLayout(layout.y + layout.height);
               }}
               placeholder="Nombre del cliente"
               className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
@@ -182,7 +176,7 @@ export function ServiceForm({
           <View
             className="absolute left-6 right-6 rounded-xl bg-white"
             style={{
-              top: form.clientInputLayout.y + 24 + 6,
+              top: form.clientInputBottom + 24 + 6,
               zIndex: 999,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 10 },

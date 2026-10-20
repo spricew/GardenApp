@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { useState, useCallback } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { useFocusEffect } from "expo-router";

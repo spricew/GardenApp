@@ -1,14 +1,11 @@
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { IconInbox, IconReceipt2 } from '@tabler/icons-react-native';
 import { useServices } from "@/hooks/useServices";
 import { usePayments } from "@/hooks/usePayments";
 import { ServiceCard } from "@/components/ServiceCard";
 import { PaymentCard } from "@/components/PaymentCard";
-import { StatusBadge } from "@/components/StatusBadge";
-import { getTodayISO, formatDateDisplay } from "@/utils/dates";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { getTodayISO } from "@/utils/dates";
 import type { ServiceStatus } from "@/types";
 import { Card } from "@/components/Card";
 import { FABMenu } from "@/components/FABMenu";
@@ -23,7 +20,6 @@ const FILTER_OPTIONS: { label: string; value: ServiceStatus | "all" }[] = [
 ];
 
 export default function TodayScreen() {
-  const router = useRouter();
   const today = getTodayISO();
   const { services, loading: servicesLoading } = useServices(today);
   const { payments, loading: paymentsLoading, togglePaid, removePayment } = usePayments(today);
