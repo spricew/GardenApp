@@ -11,24 +11,7 @@ export interface Service {
   notes: string | null;
   reminder_minutes: number;
   notification_id: string | null;
-  recurring_service_id: number | null;
   expense: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RecurringService {
-  id: number;
-  client_name: string;
-  address: string | null;
-  description: string | null;
-  scheduled_time: string | null;
-  day_of_week: number;
-  interval_weeks: number;
-  start_date: string;
-  reminder_minutes: number;
-  notes: string | null;
-  is_active: number;
   created_at: string;
   updated_at: string;
 }

@@ -5,11 +5,11 @@ import { SQLiteProvider } from "expo-sqlite";
 import { Suspense } from "react";
 import { View, ActivityIndicator, Text } from "react-native";
 import { migrateDb } from "@/database/migrations";
-import { initRecurringServices } from "@/database/recurring";
+import { cleanupLegacyRecurringServices } from "@/database/cleanup";
 
 async function initDb(db: import("expo-sqlite").SQLiteDatabase) {
   await migrateDb(db);
-  await initRecurringServices(db);
+  await cleanupLegacyRecurringServices(db);
 }
 
 function LoadingScreen() {

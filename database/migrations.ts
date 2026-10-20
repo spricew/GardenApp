@@ -3,7 +3,6 @@ import {
   CREATE_SERVICES_TABLE,
   CREATE_SERVICES_DATE_INDEX,
   CREATE_SERVICES_STATUS_INDEX,
-  CREATE_RECURRING_SERVICES_TABLE,
   CREATE_CLIENTS_TABLE,
   CREATE_DEFAULT_SERVICES_TABLE,
   CREATE_PAYMENT_DATES_TABLE,
@@ -14,7 +13,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(CREATE_SERVICES_TABLE);
   await db.execAsync(CREATE_SERVICES_DATE_INDEX);
   await db.execAsync(CREATE_SERVICES_STATUS_INDEX);
-  await db.execAsync(CREATE_RECURRING_SERVICES_TABLE);
   await db.execAsync(CREATE_CLIENTS_TABLE);
   await db.execAsync(CREATE_DEFAULT_SERVICES_TABLE);
   await db.execAsync(CREATE_PAYMENT_DATES_TABLE);
@@ -29,15 +27,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       ('Limpieza de jardín'),
       ('Aplicación de fertilizante');
     `);
-  }
-
-  // Add recurring_service_id column if missing (upgrade path)
-  try {
-    await db.execAsync(
-      `ALTER TABLE services ADD COLUMN recurring_service_id INTEGER REFERENCES recurring_services(id);`
-    );
-  } catch {
-    // Column already exists — ignore
   }
 
   // Add expense column if missing (upgrade path)
