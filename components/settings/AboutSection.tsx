@@ -1,6 +1,9 @@
 import { View, Text } from "react-native";
 import { IconInfoCircle } from '@tabler/icons-react-native';
+import Constants from "expo-constants";
 import { Card } from "@/components/Card";
+
+const APP_VERSION: string = Constants.expoConfig?.version ?? "1.0.0";
 
 export function AboutSection() {
   return (
@@ -13,7 +16,7 @@ export function AboutSection() {
       </View>
       <Text className="font-sans text-body font-semibold text-graphite mb-1">GardenApp </Text>
       <Text className="font-sans text-caption text-ash ">
-        Versión 1.26.08.22
+        Versión {APP_VERSION}
       </Text>
     </Card>
   );
