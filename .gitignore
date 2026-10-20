@@ -42,3 +42,9 @@ yarn-error.*
 
 # design specs
 DESIGN.md
+
+#Docs and project internal information
+/docs
+
+#AI Agents
+AGENTS.md
