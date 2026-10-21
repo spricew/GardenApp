@@ -7,16 +7,14 @@ import {
   IconHammer,
   IconReceipt2,
   IconCurrencyDollar,
-  IconCircleCheck,
-  IconClock,
-  IconRefresh,
-  IconPlayerPause,
-  IconCircleX,
   IconUser,
   IconAlignLeft,
-  IconChartBar,
 } from "@tabler/icons-react-native";
 import { Stack } from "expo-router";
+import { EmptyState } from "@/components/EmptyState";
+import { RankedList } from "@/components/RankedList";
+import { StatRow } from "@/components/StatRow";
+import { STATUS_ICONS } from "@/constants/status";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { getMonthName } from "@/utils/dates";
 import { STATUS_CONFIG } from "@/types";
@@ -31,112 +29,6 @@ const CATEGORIES: { value: DashboardCategory; label: string; icon: typeof IconHa
   { value: "payments", label: "Cobros", icon: IconReceipt2 },
   { value: "expenses", label: "Inversión", icon: IconCurrencyDollar },
 ];
-
-// ── Status icons map ────────────────────────────────────────────────────────
-
-const STATUS_ICONS: Record<string, typeof IconClock> = {
-  IconClock,
-  IconRefresh,
-  IconPlayerPause,
-  IconCircleCheck,
-  IconCircleX,
-};
-
-// ── Stat row helper ─────────────────────────────────────────────────────────
-
-function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <View className="flex-row items-center justify-between py-3.5 border-b border-[#f2f0ed]">
-      <Text className="font-sans text-[15px] text-[#474645] tracking-[-0.2px] flex-1">
-        {label}
-      </Text>
-      <Text
-        className={`font-sans text-[15px] font-medium tracking-[-0.2px] ${color || "text-[#343433]"}`}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-// ── Ranked list helper ──────────────────────────────────────────────────────
-
-function RankedList({
-  items,
-  formatValue,
-  icon: ListIcon,
-  iconColor,
-}: {
-  items: { name: string; value: number }[];
-  formatValue: (v: number) => string;
-  icon: typeof IconUser;
-  iconColor: string;
-}) {
-  if (items.length === 0) {
-    return (
-      <Text className="font-sans text-[15px] text-[#848281] tracking-[-0.2px] py-2">
-        Sin datos este mes.
-      </Text>
-    );
-  }
-
-  const maxValue = Math.max(...items.map((i) => i.value));
-
-  return (
-    <View className="gap-5">
-      {items.map((item) => (
-        <View key={item.name} className="gap-2.5">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-3 flex-1">
-              <View className="w-7 h-7 rounded-full items-center justify-center bg-[#f8f7f4]">
-                <ListIcon size={16} color={iconColor} strokeWidth={2.5} />
-              </View>
-              <Text
-                className="font-sans text-[15px] text-[#474645] tracking-[-0.2px] flex-1"
-                numberOfLines={1}
-              >
-                {item.name}
-              </Text>
-            </View>
-            <Text className="font-sans text-[15px] font-medium text-[#343433] tracking-[-0.2px]">
-              {formatValue(item.value)}
-            </Text>
-          </View>
-          {/* Progress bar */}
-          <View className="h-1 bg-[#f2f0ed] rounded-full overflow-hidden ml-[40px]">
-            <View
-              className="h-full rounded-full"
-              style={{
-                width: `${maxValue > 0 ? (item.value / maxValue) * 100 : 0}%`,
-                backgroundColor: iconColor,
-              }}
-            />
-          </View>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-// ── Empty State Helper ──────────────────────────────────────────────────────
-function EmptyState({ title, description, color }: { title: string; description: string; color: string }) {
-  return (
-    <View className="items-center justify-center py-16 bg-[#f8f7f4] rounded-[12px] mt-4 mb-8 mx-1">
-      <View
-        className="w-[72px] h-[72px] rounded-[72px] items-center justify-center mb-6"
-        style={{ backgroundColor: color }}
-      >
-        <IconChartBar size={32} color="#ffffff" strokeWidth={2} />
-      </View>
-      <Text className="font-sans text-[19px] font-semibold text-[#343433] tracking-[-0.25px] text-center mb-2">
-        {title}
-      </Text>
-      <Text className="font-sans text-[15px] text-[#474645] tracking-[-0.2px] text-center max-w-[240px] leading-[22px]">
-        {description}
-      </Text>
-    </View>
-  );
-}
 
 // ── Main screen ─────────────────────────────────────────────────────────────
 
@@ -309,8 +201,8 @@ export default function DashboardScreen() {
                         <View>
                           <StatRow label="Total de cobros" value={String(paymentStats.total)} />
                           <StatRow label="Monto total" value={`$${paymentStats.totalAmount.toFixed(2)}`} />
-                          <StatRow label="Cobrados" value={`${paymentStats.paidCount} ($${paymentStats.paidAmount.toFixed(2)})`} color="text-[#00c454]" />
-                          <StatRow label="Pendientes" value={`${paymentStats.unpaidCount} ($${paymentStats.unpaidAmount.toFixed(2)})`} color="text-[#ff2b3a]" />
+                          <StatRow label="Cobrados" value={`${paymentStats.paidCount} ($${paymentStats.paidAmount.toFixed(2)})`} valueClassName="text-valid-green" />
+                          <StatRow label="Pendientes" value={`${paymentStats.unpaidCount} ($${paymentStats.unpaidAmount.toFixed(2)})`} valueClassName="text-coral-red" />
                         </View>
                       </Card>
 
@@ -340,14 +232,14 @@ export default function DashboardScreen() {
                     <View className='gap-y-2'>
                       <Card title="Resumen de Inversión">
                         <View>
-                          <StatRow label="Gasto total" value={`$${expenseStats.totalExpense.toFixed(2)}`} color="text-[#ff2b3a]" />
+                          <StatRow label="Gasto total" value={`$${expenseStats.totalExpense.toFixed(2)}`} valueClassName="text-coral-red" />
                           <StatRow label="Servicios con gasto" value={String(expenseStats.servicesWithExpense)} />
                           <StatRow label="Promedio por servicio" value={`$${expenseStats.avgExpense.toFixed(2)}`} />
                           {paymentStats.totalAmount > 0 && (
                             <StatRow
                               label="Margen (cobros − gastos)"
                               value={`$${(paymentStats.paidAmount - expenseStats.totalExpense).toFixed(2)}`}
-                              color={paymentStats.paidAmount - expenseStats.totalExpense >= 0 ? "text-[#00c454]" : "text-[#ff2b3a]"}
+                              valueClassName={paymentStats.paidAmount - expenseStats.totalExpense >= 0 ? "text-valid-green" : "text-coral-red"}
                             />
                           )}
                         </View>
