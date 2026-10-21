@@ -1,99 +1,84 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import type { PaymentDate } from "@/types";
+import type { SQLiteDatabase } from "expo-sqlite";
+import type { DatabaseResult, PaymentDate } from "@/types";
 import * as paymentsDb from "@/database/payments";
 import { getTodayISO } from "@/utils/dates";
+import { useCrud } from "./useCrud";
+import { useListData } from "./useListData";
+import { useMonthDates } from "./useMonthDates";
 
 export function usePayments(date?: string) {
   const db = useSQLiteContext();
-  const [payments, setPayments] = useState<PaymentDate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const targetDate = date || getTodayISO();
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await paymentsDb.getPaymentDatesByDate(db, targetDate);
-      if (result.success && result.data) {
-        setPayments(result.data);
-      } else {
-        setError(result.error?.message || 'Error al cargar cobros');
-      }
-    } catch (err) {
-      setError('Error inesperado al cargar cobros');
-    } finally {
-      setLoading(false);
-    }
-  }, [db, targetDate]);
+  const load = useCallback(
+    (database: SQLiteDatabase): Promise<DatabaseResult<PaymentDate[]>> =>
+      paymentsDb.getPaymentDatesByDate(database, targetDate),
+    [targetDate]
+  );
 
+  const {
+    data: payments,
+    loading,
+    error: loadError,
+    refresh,
+  } = useListData<PaymentDate>(load, "Error al cargar cobros");
+
+  const { error: mutationError, reset: resetMutationError, run } = useCrud();
+
+  // A list reload owns the current state, so a mutation error from a previous
+  // visit should not linger after the screen regains focus.
   useFocusEffect(
     useCallback(() => {
-      refresh();
-    }, [refresh])
+      resetMutationError();
+    }, [resetMutationError])
   );
 
   const togglePaid = useCallback(
     async (id: number, isPaid: boolean): Promise<boolean> => {
-      try {
-        const result = await paymentsDb.togglePaymentPaid(db, id, isPaid);
-        if (!result.success) {
-          setError(result.error?.message || 'Error al actualizar pago');
-          return false;
+      const result = await run(
+        () => paymentsDb.togglePaymentPaid(db, id, isPaid),
+        {
+          errorMessage: "Error al actualizar pago",
+          invalidate: refresh,
         }
-        await refresh();
-        return true;
-      } catch (err) {
-        setError('Error inesperado al actualizar pago');
-        return false;
-      }
+      );
+      return result.success;
     },
-    [db, refresh]
+    [db, refresh, run]
   );
 
   const removePayment = useCallback(
     async (id: number): Promise<boolean> => {
-      try {
-        const result = await paymentsDb.deletePaymentDate(db, id);
-        if (!result.success) {
-          setError(result.error?.message || 'Error al eliminar cobro');
-          return false;
-        }
-        await refresh();
-        return true;
-      } catch (err) {
-        setError('Error inesperado al eliminar cobro');
-        return false;
-      }
+      const result = await run(() => paymentsDb.deletePaymentDate(db, id), {
+        errorMessage: "Error al eliminar cobro",
+        invalidate: refresh,
+      });
+      return result.success;
     },
-    [db, refresh]
+    [db, refresh, run]
   );
 
-  return { payments, loading, error, refresh, togglePaid, removePayment };
+  return {
+    payments,
+    loading,
+    error: loadError ?? mutationError,
+    refresh,
+    togglePaid,
+    removePayment,
+  };
 }
 
 export function usePaymentDates(year: number, month: number) {
-  const db = useSQLiteContext();
-  const [dates, setDates] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(
+    (db: SQLiteDatabase): Promise<DatabaseResult<string[]>> =>
+      paymentsDb.getPaymentDatesInMonth(db, year, month),
+    [year, month]
+  );
 
-  const loadDates = useCallback(async () => {
-    try {
-      const result = await paymentsDb.getPaymentDatesInMonth(db, year, month);
-      if (result.success && result.data) {
-        setDates(result.data);
-      } else {
-        setError(result.error?.message || 'Error al cargar fechas');
-      }
-    } catch (err) {
-      setError('Error inesperado al cargar fechas');
-    }
-  }, [db, year, month]);
-
-  useFocusEffect(useCallback(() => { loadDates(); }, [loadDates]));
+  const { dates, error } = useMonthDates(load, "Error al cargar fechas");
 
   return { dates, error };
 }
