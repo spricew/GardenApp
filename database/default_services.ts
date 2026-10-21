@@ -1,41 +1,33 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { DefaultService, DatabaseResult } from "@/types";
-import { createDatabaseResult, createDatabaseError } from "@/types";
+import { getRepository } from "./repository";
 
 export async function getDefaultServices(db: SQLiteDatabase): Promise<DatabaseResult<DefaultService[]>> {
-  try {
-    const data = await db.getAllAsync<DefaultService>(
-      `SELECT * FROM default_services ORDER BY name ASC;`
-    );
-    return createDatabaseResult(data);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al obtener servicios por defecto', error);
-  }
+  return getRepository(db).all<DefaultService>(
+    `SELECT * FROM default_services ORDER BY name ASC;`,
+    [],
+    'Error al obtener servicios por defecto'
+  );
 }
 
 export async function addDefaultService(
   db: SQLiteDatabase,
   name: string
 ): Promise<DatabaseResult<number>> {
-  try {
-    const result = await db.runAsync(
-      `INSERT OR IGNORE INTO default_services (name) VALUES (?);`,
-      [name]
-    );
-    return createDatabaseResult(result.lastInsertRowId);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al agregar servicio por defecto', error);
-  }
+  return getRepository(db).insert(
+    `INSERT OR IGNORE INTO default_services (name) VALUES (?);`,
+    [name],
+    'Error al agregar servicio por defecto'
+  );
 }
 
 export async function removeDefaultService(
   db: SQLiteDatabase,
   id: number
 ): Promise<DatabaseResult<void>> {
-  try {
-    await db.runAsync(`DELETE FROM default_services WHERE id = ?;`, [id]);
-    return createDatabaseResult(undefined);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al eliminar servicio por defecto', error);
-  }
+  return getRepository(db).execute(
+    `DELETE FROM default_services WHERE id = ?;`,
+    [id],
+    'Error al eliminar servicio por defecto'
+  );
 }

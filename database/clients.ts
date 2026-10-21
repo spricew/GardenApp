@@ -1,16 +1,13 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { Client, DatabaseResult } from "@/types";
-import { createDatabaseResult, createDatabaseError } from "@/types";
+import { getRepository } from "./repository";
 
 export async function getClients(db: SQLiteDatabase): Promise<DatabaseResult<Client[]>> {
-  try {
-    const data = await db.getAllAsync<Client>(
-      `SELECT * FROM clients ORDER BY name ASC;`
-    );
-    return createDatabaseResult(data);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al obtener clientes', error);
-  }
+  return getRepository(db).all<Client>(
+    `SELECT * FROM clients ORDER BY name ASC;`,
+    [],
+    'Error al obtener clientes'
+  );
 }
 
 export async function addClient(
@@ -18,25 +15,20 @@ export async function addClient(
   name: string,
   address?: string
 ): Promise<DatabaseResult<number>> {
-  try {
-    const result = await db.runAsync(
-      `INSERT OR REPLACE INTO clients (name, address) VALUES (?, ?);`,
-      [name, address || null]
-    );
-    return createDatabaseResult(result.lastInsertRowId);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al agregar cliente', error);
-  }
+  return getRepository(db).insert(
+    `INSERT OR REPLACE INTO clients (name, address) VALUES (?, ?);`,
+    [name, address || null],
+    'Error al agregar cliente'
+  );
 }
 
 export async function removeClient(
   db: SQLiteDatabase,
   id: number
 ): Promise<DatabaseResult<void>> {
-  try {
-    await db.runAsync(`DELETE FROM clients WHERE id = ?;`, [id]);
-    return createDatabaseResult(undefined);
-  } catch (error) {
-    return createDatabaseError('DB_ERROR', 'Error al eliminar cliente', error);
-  }
+  return getRepository(db).execute(
+    `DELETE FROM clients WHERE id = ?;`,
+    [id],
+    'Error al eliminar cliente'
+  );
 }
