@@ -188,10 +188,10 @@ export default function DashboardScreen() {
             </Pressable>
 
             <View className="items-center">
-              <Text className="font-display font-medium text-heading text-[#343433] tracking-[-1.14px] capitalize">
+              <Text className="font-display font-medium text-heading text-[#343433] tracking-tighter capitalize">
                 {getMonthName(currentMonth)}
               </Text>
-              <Text className="font-sans text-[17px] text-[#848281] tracking-[-0.22px] mt-1">
+              <Text className="font-sans text-[17px] text-[#848281]">
                 {currentYear}
               </Text>
             </View>
