@@ -25,15 +25,19 @@ export interface PaymentTotals {
   unpaidAmount: number;
 }
 
-export interface ClientCount {
+export interface NamedCount {
   name: string;
   count: number;
 }
 
-export interface ClientTotal {
+export interface NamedTotal {
   name: string;
   total: number;
 }
+
+/** Client-specific aliases for readability at call sites. */
+export type ClientCount = NamedCount;
+export type ClientTotal = NamedTotal;
 
 export interface ExpenseTotals {
   totalExpense: number;
@@ -101,10 +105,49 @@ export async function getTopServiceClients(
      FROM services
      WHERE scheduled_date >= ? AND scheduled_date < ?
      GROUP BY client_name
-     ORDER BY count DESC
+     ORDER BY count DESC, name ASC
      LIMIT ?`,
     [start, end, limit],
     "Error al obtener clientes frecuentes"
+  );
+}
+
+/**
+ * Top service types by occurrences in the month.
+ *
+ * `description` stores one or more service names separated by commas. The
+ * recursive CTE splits each row into tokens so the aggregation stays in
+ * SQLite instead of loading every service into memory.
+ */
+export async function getTopServiceTypes(
+  db: SQLiteDatabase,
+  year: number,
+  month: number,
+  limit = 5
+): Promise<DatabaseResult<NamedCount[]>> {
+  const { start, end } = getMonthRange(year, month);
+  return getRepository(db).all<NamedCount>(
+    `WITH RECURSIVE split(id, token, rest) AS (
+       SELECT id,
+              TRIM(substr(description, 1, instr(description || ',', ',') - 1)),
+              substr(description, instr(description || ',', ',') + 1)
+       FROM services
+       WHERE scheduled_date >= ? AND scheduled_date < ? AND description IS NOT NULL
+       UNION ALL
+       SELECT id,
+              TRIM(substr(rest, 1, instr(rest || ',', ',') - 1)),
+              substr(rest, instr(rest || ',', ',') + 1)
+       FROM split
+       WHERE rest <> ''
+     )
+     SELECT token AS name, COUNT(*) AS count
+     FROM split
+     WHERE token <> ''
+     GROUP BY token
+     ORDER BY count DESC, name ASC
+     LIMIT ?`,
+    [start, end, limit],
+    "Error al obtener servicios más realizados"
   );
 }
 
@@ -142,10 +185,58 @@ export async function getExpenseByClient(
      FROM services
      WHERE scheduled_date >= ? AND scheduled_date < ? AND expense > 0
      GROUP BY client_name
-     ORDER BY total DESC
+     ORDER BY total DESC, name ASC
      LIMIT ?`,
     [start, end, limit],
     "Error al obtener gastos por cliente"
+  );
+}
+
+/**
+ * Top service types by distributed expense in the month.
+ *
+ * Each service's expense is split evenly across its comma-separated
+ * description tokens (the same rule the dashboard used to apply in JS), so a
+ * service with two types contributes half of its expense to each one.
+ */
+export async function getExpenseByServiceType(
+  db: SQLiteDatabase,
+  year: number,
+  month: number,
+  limit = 5
+): Promise<DatabaseResult<NamedTotal[]>> {
+  const { start, end } = getMonthRange(year, month);
+  return getRepository(db).all<NamedTotal>(
+    `WITH RECURSIVE split(id, expense, token, rest) AS (
+       SELECT id,
+              expense,
+              TRIM(substr(description, 1, instr(description || ',', ',') - 1)),
+              substr(description, instr(description || ',', ',') + 1)
+       FROM services
+       WHERE scheduled_date >= ? AND scheduled_date < ? AND description IS NOT NULL
+       UNION ALL
+       SELECT id,
+              expense,
+              TRIM(substr(rest, 1, instr(rest || ',', ',') - 1)),
+              substr(rest, instr(rest || ',', ',') + 1)
+       FROM split
+       WHERE rest <> ''
+     ),
+     token_counts AS (
+       SELECT id, COUNT(*) AS token_count
+       FROM split
+       WHERE token <> ''
+       GROUP BY id
+     )
+     SELECT s.token AS name, SUM(s.expense * 1.0 / tc.token_count) AS total
+     FROM split s
+     JOIN token_counts tc ON tc.id = s.id
+     WHERE s.token <> '' AND s.expense > 0
+     GROUP BY s.token
+     ORDER BY total DESC, name ASC
+     LIMIT ?`,
+    [start, end, limit],
+    "Error al obtener gastos por tipo de servicio"
   );
 }
 
@@ -204,7 +295,7 @@ export async function getTopPaymentClients(
      FROM payment_dates
      WHERE estimated_date >= ? AND estimated_date < ?
      GROUP BY client_name
-     ORDER BY total DESC
+     ORDER BY total DESC, name ASC
      LIMIT ?`,
     [start, end, limit],
     "Error al obtener clientes por monto"
