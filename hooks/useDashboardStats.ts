@@ -1,190 +1,197 @@
-import { useState, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import type { Service, PaymentDate, ServiceStatus } from "@/types";
-import { getServicesInMonth, getPaymentsInMonth } from "@/database/stats";
+import type { ServiceStatus } from "@/types";
+import {
+  getExpenseByClient,
+  getExpenseByServiceType,
+  getExpenseTotals,
+  getPaymentTotals,
+  getServiceStatusCounts,
+  getTopPaymentClients,
+  getTopServiceClients,
+  getTopServiceTypes,
+} from "@/database/stats";
+import type {
+  ClientCount,
+  ClientTotal,
+  ExpenseTotals,
+  NamedCount,
+  NamedTotal,
+  PaymentTotals,
+} from "@/database/stats";
 
 // ── Derived stat types ──────────────────────────────────────────────────────
 
 interface ServiceStats {
   total: number;
   byStatus: Record<ServiceStatus, number>;
-  topClients: { name: string; count: number }[];
-  topServices: { name: string; count: number }[];
+  topClients: ClientCount[];
+  topServices: NamedCount[];
 }
 
-interface PaymentStats {
-  total: number;
-  totalAmount: number;
-  paidCount: number;
-  unpaidCount: number;
-  paidAmount: number;
-  unpaidAmount: number;
-  topClients: { name: string; total: number }[];
+interface PaymentStats extends PaymentTotals {
+  topClients: ClientTotal[];
 }
 
-interface ExpenseStats {
-  totalExpense: number;
-  servicesWithExpense: number;
+interface ExpenseStats extends ExpenseTotals {
   avgExpense: number;
-  expenseByService: { name: string; total: number }[];
-  expenseByClient: { name: string; total: number }[];
+  expenseByService: NamedTotal[];
+  expenseByClient: ClientTotal[];
+}
+
+const EMPTY_PAYMENT_TOTALS: PaymentTotals = {
+  total: 0,
+  totalAmount: 0,
+  paidCount: 0,
+  unpaidCount: 0,
+  paidAmount: 0,
+  unpaidAmount: 0,
+};
+
+const EMPTY_EXPENSE_TOTALS: ExpenseTotals = {
+  totalExpense: 0,
+  servicesWithExpense: 0,
+};
+
+function createEmptyServiceStats(): ServiceStats {
+  return {
+    total: 0,
+    byStatus: {
+      pending: 0,
+      in_progress: 0,
+      postponed: 0,
+      done: 0,
+      not_done: 0,
+    },
+    topClients: [],
+    topServices: [],
+  };
+}
+
+function createEmptyPaymentStats(): PaymentStats {
+  return { ...EMPTY_PAYMENT_TOTALS, topClients: [] };
+}
+
+function createEmptyExpenseStats(): ExpenseStats {
+  return {
+    ...EMPTY_EXPENSE_TOTALS,
+    avgExpense: 0,
+    expenseByService: [],
+    expenseByClient: [],
+  };
 }
 
 // ── Hook ────────────────────────────────────────────────────────────────────
 
 export function useDashboardStats(year: number, month: number) {
   const db = useSQLiteContext();
-  const [services, setServices] = useState<Service[]>([]);
-  const [payments, setPayments] = useState<PaymentDate[]>([]);
+  const [serviceStats, setServiceStats] = useState<ServiceStats>(
+    createEmptyServiceStats
+  );
+  const [paymentStats, setPaymentStats] = useState<PaymentStats>(
+    createEmptyPaymentStats
+  );
+  const [expenseStats, setExpenseStats] = useState<ExpenseStats>(
+    createEmptyExpenseStats
+  );
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
   const refresh = useCallback(async () => {
+    const request = ++requestId.current;
     setLoading(true);
+    setError(null);
     try {
-      const [sResult, pResult] = await Promise.all([
-        getServicesInMonth(db, year, month),
-        getPaymentsInMonth(db, year, month),
+      const [
+        statusResult,
+        serviceClientsResult,
+        serviceTypesResult,
+        paymentTotalsResult,
+        paymentClientsResult,
+        expenseTotalsResult,
+        expenseByClientResult,
+        expenseByServiceResult,
+      ] = await Promise.all([
+        getServiceStatusCounts(db, year, month),
+        getTopServiceClients(db, year, month),
+        getTopServiceTypes(db, year, month),
+        getPaymentTotals(db, year, month),
+        getTopPaymentClients(db, year, month),
+        getExpenseTotals(db, year, month),
+        getExpenseByClient(db, year, month),
+        getExpenseByServiceType(db, year, month),
       ]);
-      if (sResult.success && sResult.data) setServices(sResult.data);
-      if (pResult.success && pResult.data) setPayments(pResult.data);
+
+      if (request !== requestId.current) return;
+
+      const failure = [
+        statusResult,
+        serviceClientsResult,
+        serviceTypesResult,
+        paymentTotalsResult,
+        paymentClientsResult,
+        expenseTotalsResult,
+        expenseByClientResult,
+        expenseByServiceResult,
+      ].find((result) => !result.success);
+
+      if (failure) {
+        setError(failure.error?.message ?? "Error al cargar estadísticas");
+        return;
+      }
+
+      // Service stats
+      const byStatus = createEmptyServiceStats().byStatus;
+      for (const row of statusResult.data ?? []) {
+        byStatus[row.status] = row.count;
+      }
+
+      setServiceStats({
+        total: Object.values(byStatus).reduce((sum, count) => sum + count, 0),
+        byStatus,
+        topClients: serviceClientsResult.data ?? [],
+        topServices: serviceTypesResult.data ?? [],
+      });
+
+      // Payment stats
+      setPaymentStats({
+        ...(paymentTotalsResult.data ?? EMPTY_PAYMENT_TOTALS),
+        topClients: paymentClientsResult.data ?? [],
+      });
+
+      // Expense stats
+      const totals = expenseTotalsResult.data ?? EMPTY_EXPENSE_TOTALS;
+      setExpenseStats({
+        ...totals,
+        avgExpense:
+          totals.servicesWithExpense > 0
+            ? totals.totalExpense / totals.servicesWithExpense
+            : 0,
+        expenseByService: expenseByServiceResult.data ?? [],
+        expenseByClient: expenseByClientResult.data ?? [],
+      });
     } catch {
-      // Error handled by empty state
+      if (request !== requestId.current) return;
+      setError("Error inesperado al cargar estadísticas");
     } finally {
-      setLoading(false);
+      if (request === requestId.current) {
+        setLoading(false);
+      }
     }
   }, [db, year, month]);
 
   useFocusEffect(
     useCallback(() => {
       refresh();
+      return () => {
+        // Invalidate in-flight queries when the screen blurs or unmounts so a
+        // previous month cannot overwrite the currently selected one.
+        requestId.current++;
+      };
     }, [refresh])
   );
 
-  // ── Compute service stats ───────────────────────────────────────────────
-
-  const serviceStats: ServiceStats = (() => {
-    const byStatus: Record<ServiceStatus, number> = {
-      pending: 0,
-      in_progress: 0,
-      postponed: 0,
-      done: 0,
-      not_done: 0,
-    };
-    const clientMap = new Map<string, number>();
-    const serviceMap = new Map<string, number>();
-
-    for (const s of services) {
-      byStatus[s.status]++;
-      clientMap.set(s.client_name, (clientMap.get(s.client_name) || 0) + 1);
-      if (s.description) {
-        const names = s.description.split(",").map((n) => n.trim()).filter(Boolean);
-        for (const name of names) {
-          serviceMap.set(name, (serviceMap.get(name) || 0) + 1);
-        }
-      }
-    }
-
-    const topClients = [...clientMap.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    const topServices = [...serviceMap.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    return {
-      total: services.length,
-      byStatus,
-      topClients,
-      topServices,
-    };
-  })();
-
-  // ── Compute payment stats ───────────────────────────────────────────────
-
-  const paymentStats: PaymentStats = (() => {
-    let totalAmount = 0;
-    let paidCount = 0;
-    let unpaidCount = 0;
-    let paidAmount = 0;
-    let unpaidAmount = 0;
-    const clientMap = new Map<string, number>();
-
-    for (const p of payments) {
-      const amt = p.amount ?? 0;
-      totalAmount += amt;
-      if (p.is_paid) {
-        paidCount++;
-        paidAmount += amt;
-      } else {
-        unpaidCount++;
-        unpaidAmount += amt;
-      }
-      clientMap.set(p.client_name, (clientMap.get(p.client_name) || 0) + amt);
-    }
-
-    const topClients = [...clientMap.entries()]
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-
-    return {
-      total: payments.length,
-      totalAmount,
-      paidCount,
-      unpaidCount,
-      paidAmount,
-      unpaidAmount,
-      topClients,
-    };
-  })();
-
-  // ── Compute expense stats ───────────────────────────────────────────────
-
-  const expenseStats: ExpenseStats = (() => {
-    let totalExpense = 0;
-    let servicesWithExpense = 0;
-    const serviceMap = new Map<string, number>();
-    const clientMap = new Map<string, number>();
-
-    for (const s of services) {
-      if (s.expense !== null && s.expense > 0) {
-        totalExpense += s.expense;
-        servicesWithExpense++;
-
-        clientMap.set(s.client_name, (clientMap.get(s.client_name) || 0) + s.expense);
-
-        if (s.description) {
-          const names = s.description.split(",").map((n) => n.trim()).filter(Boolean);
-          const perService = s.expense / names.length;
-          for (const name of names) {
-            serviceMap.set(name, (serviceMap.get(name) || 0) + perService);
-          }
-        }
-      }
-    }
-
-    const expenseByService = [...serviceMap.entries()]
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-
-    const expenseByClient = [...clientMap.entries()]
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-
-    return {
-      totalExpense,
-      servicesWithExpense,
-      avgExpense: servicesWithExpense > 0 ? totalExpense / servicesWithExpense : 0,
-      expenseByService,
-      expenseByClient,
-    };
-  })();
-
-  return { loading, serviceStats, paymentStats, expenseStats, refresh };
+  return { loading, serviceStats, paymentStats, expenseStats, refresh, error };
 }
