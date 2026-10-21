@@ -81,6 +81,21 @@ export function getMonthName(month: number): string {
   return date.toLocaleDateString('es-MX', { month: 'long' });
 }
 
+/**
+ * Half-open date range (`>= start`, `< end`) for a month.
+ * Range comparisons can use date indexes; `LIKE 'YYYY-MM%'` often cannot.
+ */
+export function getMonthRange(
+  year: number,
+  month: number
+): { start: string; end: string } {
+  const start = `${year}-${String(month).padStart(2, '0')}-01`;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const end = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+  return { start, end };
+}
+
 export function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
 }
