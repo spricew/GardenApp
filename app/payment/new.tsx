@@ -8,6 +8,7 @@ import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/dat
 import { Card } from "@/components/Card";
 import { createPaymentDate } from "@/database/payments";
 import { getClients } from "@/database/clients";
+import { formatDateISO } from "@/utils/dates";
 import type { PaymentDateFormData, Client } from "@/types";
 
 export default function NewPaymentScreen() {
@@ -50,10 +51,6 @@ export default function NewPaymentScreen() {
     if (selectedDate) setEstimatedDate(selectedDate);
   };
 
-  const formatDate = (date: Date) => {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  };
-
   const handleSave = async () => {
     if (!clientName.trim()) {
       Alert.alert("Error", "El nombre del cliente es obligatorio");
@@ -65,7 +62,7 @@ export default function NewPaymentScreen() {
       const data: PaymentDateFormData = {
         client_name: clientName.trim(),
         amount: amount.trim() ? parseFloat(amount.trim()) : null,
-        estimated_date: formatDate(estimatedDate),
+        estimated_date: formatDateISO(estimatedDate),
         notes: notes.trim(),
       };
 
@@ -219,7 +216,7 @@ export default function NewPaymentScreen() {
                   />
                 ) : (
                   <Text className="font-sans text-[15px] text-graphite">
-                    {formatDate(estimatedDate)}
+                    {formatDateISO(estimatedDate)}
                   </Text>
                 )}
               </View>

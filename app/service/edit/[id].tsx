@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { updateService, getServiceById, updateServiceNotificationId } from "@/database/services";
 import { scheduleServiceReminder, cancelServiceReminder } from "@/utils/notifications";
-import { combineDateAndTime } from "@/utils/dates";
 import type { ServiceFormData, Service } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ServiceForm, type ServiceFormValues } from "@/components/ServiceForm";
@@ -26,9 +25,7 @@ export default function EditServiceScreen() {
       if (result.success && result.data) {
         const service = result.data;
         setOriginalService(service);
-        
-        const dateObj = combineDateAndTime(service.scheduled_date, service.scheduled_time || "12:00") || new Date();
-        
+
         setInitialValues({
           client_name: service.client_name,
           address: service.address || "",
@@ -36,8 +33,8 @@ export default function EditServiceScreen() {
           notes: service.notes || "",
           reminder_minutes: service.reminder_minutes,
           expense: service.expense !== null ? String(service.expense) : "",
-          scheduled_date: dateObj,
-          scheduled_time: dateObj,
+          scheduled_date: service.scheduled_date,
+          scheduled_time: service.scheduled_time || "12:00",
         });
       }
     } catch (error) {

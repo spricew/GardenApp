@@ -21,15 +21,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Card } from "./Card";
 import { ReminderPicker } from "./ReminderPicker";
-import {
-  useServiceForm,
-  formatDateForDisplay,
-  formatTimeForDisplay,
-} from "@/hooks/useServiceForm";
+import { useServiceForm } from "@/hooks/useServiceForm";
+import { formatDateForDisplay, formatTimeForDisplay } from "@/utils/dates";
 import type { ServiceFormData } from "@/types";
 
 // Re-export so existing consumers don't break
-export type { ServiceFormValues } from "@/hooks/useServiceForm";
+export type { ServiceFormValues } from "@/types";
 
 interface ServiceFormProps {
   initialValues?: Parameters<typeof useServiceForm>[0]["initialValues"];
@@ -241,7 +238,7 @@ export function ServiceForm({
             </View>
             {Platform.OS === "ios" ? (
               <DateTimePicker
-                value={form.scheduledDate}
+                value={form.scheduledDateObj}
                 mode="date"
                 display="inline"
                 onChange={form.onDateChange}
@@ -256,7 +253,7 @@ export function ServiceForm({
                 style={{ borderCurve: "continuous" }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
-                  {formatDateForDisplay(form.scheduledDate)}
+                  {formatDateForDisplay(form.scheduledDateObj)}
                 </Text>
               </Pressable>
             )}
@@ -270,7 +267,7 @@ export function ServiceForm({
             </View>
             {Platform.OS === "ios" ? (
               <DateTimePicker
-                value={form.scheduledTime}
+                value={form.scheduledTimeObj}
                 mode="time"
                 display="compact"
                 onChange={form.onTimeChange}
@@ -284,7 +281,7 @@ export function ServiceForm({
                 style={{ borderCurve: "continuous" }}
               >
                 <Text className="font-sans text-[15px] text-graphite">
-                  {formatTimeForDisplay(form.scheduledTime)}
+                  {formatTimeForDisplay(form.scheduledTimeObj)}
                 </Text>
               </Pressable>
             )}
@@ -293,7 +290,7 @@ export function ServiceForm({
 
         {form.showDatePicker && Platform.OS === "android" && (
           <DateTimePicker
-            value={form.scheduledDate}
+            value={form.scheduledDateObj}
             mode="date"
             display="default"
             onChange={form.onDateChange}
@@ -303,7 +300,7 @@ export function ServiceForm({
 
         {form.showTimePicker && Platform.OS === "android" && (
           <DateTimePicker
-            value={form.scheduledTime}
+            value={form.scheduledTimeObj}
             mode="time"
             display="default"
             onChange={form.onTimeChange}
@@ -359,8 +356,8 @@ export function ServiceForm({
           <ReminderPicker
             value={form.reminderMinutes}
             onChange={form.setReminderMinutes}
-            scheduledDate={form.scheduledDate}
-            scheduledTime={form.scheduledTime}
+            scheduledDate={form.scheduledDateObj}
+            scheduledTime={form.scheduledTimeObj}
           />
         </View>
       </Card>

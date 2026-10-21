@@ -1,68 +1,37 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 import { getClients, addClient } from "@/database/clients";
 import { getDefaultServices } from "@/database/default_services";
-import type { ServiceFormData, Client, DefaultService } from "@/types";
+import {
+  getTodayISO,
+  formatDateISO,
+  formatTimeHHmm,
+  parseISODateLocal,
+  parseTimeToDate,
+} from "@/utils/dates";
+import type {
+  ServiceFormData,
+  ServiceFormValues,
+  Client,
+  DefaultService,
+} from "@/types";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-
-export interface ServiceFormValues {
-  client_name: string;
-  address: string;
-  description: string;
-  scheduled_date: Date;
-  scheduled_time: Date;
-  notes: string;
-  reminder_minutes: number;
-  expense: string;
-}
 
 interface UseServiceFormOptions {
   initialValues?: Partial<ServiceFormValues>;
   onSubmit: (data: ServiceFormData) => void;
 }
 
-// ── Formatters ─────────────────────────────────────────────────────────────────
-
-const formatDate = (date: Date): string => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(date.getDate()).padStart(2, "0")}`;
-};
-
-const formatTime = (date: Date): string => {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes()
-  ).padStart(2, "0")}`;
-};
-
-export const formatDateForDisplay = (date: Date): string => {
-  return date.toLocaleDateString("es-MX", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-export const formatTimeForDisplay = (date: Date): string => {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM";
-  const displayHours = hours % 12 || 12;
-  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
-};
-
 // ── Hook ───────────────────────────────────────────────────────────────────────
 
 export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOptions) {
   const db = useSQLiteContext();
 
-  // Form fields
+  // Form fields — dates/times are stored as ISO strings, matching ServiceFormData.
   const [clientName, setClientName] = useState(initialValues?.client_name || "");
   const [address, setAddress] = useState(initialValues?.address || "");
   const [description, setDescription] = useState(initialValues?.description || "");
@@ -72,10 +41,20 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
     initialValues?.reminder_minutes ?? 2880
   );
   const [scheduledDate, setScheduledDate] = useState(
-    initialValues?.scheduled_date || new Date()
+    initialValues?.scheduled_date || getTodayISO()
   );
   const [scheduledTime, setScheduledTime] = useState(
-    initialValues?.scheduled_time || new Date()
+    initialValues?.scheduled_time || formatTimeHHmm(new Date())
+  );
+
+  // Derived Date objects — only the native pickers need them.
+  const scheduledDateObj = useMemo(
+    () => parseISODateLocal(scheduledDate),
+    [scheduledDate]
+  );
+  const scheduledTimeObj = useMemo(
+    () => parseTimeToDate(scheduledTime),
+    [scheduledTime]
   );
 
   // UI state
@@ -159,7 +138,7 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   const onDateChange = useCallback(
     (_event: DateTimePickerEvent, selectedDate?: Date) => {
       setShowDatePicker(false);
-      if (selectedDate) setScheduledDate(selectedDate);
+      if (selectedDate) setScheduledDate(formatDateISO(selectedDate));
     },
     []
   );
@@ -167,7 +146,7 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   const onTimeChange = useCallback(
     (_event: DateTimePickerEvent, selectedTime?: Date) => {
       setShowTimePicker(false);
-      if (selectedTime) setScheduledTime(selectedTime);
+      if (selectedTime) setScheduledTime(formatTimeHHmm(selectedTime));
     },
     []
   );
@@ -218,15 +197,25 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
       client_name: clientName.trim(),
       address: address.trim(),
       description: description.trim(),
-      scheduled_date: formatDate(scheduledDate),
-      scheduled_time: formatTime(scheduledTime),
+      scheduled_date: scheduledDate,
+      scheduled_time: scheduledTime,
       notes: notes.trim(),
       reminder_minutes: reminderMinutes,
       expense: expense.trim() ? parseFloat(expense.trim()) : null,
     };
 
     onSubmit(data);
-  }, [clientName, address, description, scheduledDate, scheduledTime, notes, reminderMinutes, expense, onSubmit]);
+  }, [
+    clientName,
+    address,
+    description,
+    scheduledDate,
+    scheduledTime,
+    notes,
+    reminderMinutes,
+    expense,
+    onSubmit,
+  ]);
 
   // ── Return ────────────────────────────────────────────────────────────────
 
@@ -246,6 +235,8 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
     setReminderMinutes,
     scheduledDate,
     scheduledTime,
+    scheduledDateObj,
+    scheduledTimeObj,
 
     // Client autocomplete
     filteredClients,
