@@ -20,11 +20,25 @@ export interface ServiceFormData {
   client_name: string;
   address: string;
   description: string;
+  /** ISO date (YYYY-MM-DD) */
   scheduled_date: string;
+  /** 24h time (HH:mm) */
   scheduled_time: string;
   notes: string;
   reminder_minutes: number;
   expense: number | null;
+}
+
+/**
+ * UI-only form state for creating/editing a service.
+ *
+ * It mirrors {@link ServiceFormData} field-by-field (dates stay as ISO strings)
+ * with a single intentional difference: `expense` is kept as editable text so
+ * the input can hold intermediate values like "" or "12.". Conversion happens
+ * once on submit, never in the pickers or the form fields.
+ */
+export interface ServiceFormValues extends Omit<ServiceFormData, 'expense'> {
+  expense: string;
 }
 
 export interface PaymentDate {
@@ -56,7 +70,7 @@ export interface DefaultService {
   name: string;
 }
 
-interface AppError {
+export interface AppError {
   code: string;
   message: string;
   details?: unknown;
@@ -68,7 +82,17 @@ export interface DatabaseResult<T> {
   error?: AppError;
 }
 
-type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
+/**
+ * Standard shape for async screen/hook state so every consumer reads
+ * `loading`, `error` and `data` the same way.
+ */
+export interface FormState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export type TablerIconName = 'IconClock' | 'IconRefresh' | 'IconPlayerPause' | 'IconCircleCheck' | 'IconCircleX';
 
 export const STATUS_CONFIG: Record<
   ServiceStatus,
