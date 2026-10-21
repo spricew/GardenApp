@@ -1,14 +1,6 @@
 import { View, Text } from 'react-native';
-import { IconClock, IconRefresh, IconPlayerPause, IconCircleCheck, IconCircleX } from '@tabler/icons-react-native';
 import { STATUS_CONFIG, type ServiceStatus } from "@/types";
-
-const STATUS_ICONS = {
-  IconClock,
-  IconRefresh,
-  IconPlayerPause,
-  IconCircleCheck,
-  IconCircleX,
-};
+import { STATUS_ICONS } from "@/constants/status";
 
 interface StatusBadgeProps {
   status: ServiceStatus;

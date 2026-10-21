@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useState, useCallback } from "react";
-import { IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconCircleCheck, IconPlayerPause, IconRefresh, IconCircleX, IconEdit, IconDots, IconCalendarPlus, IconCurrencyDollar } from '@tabler/icons-react-native';
+import { IconCalendar, IconClock, IconMapPin, IconAlignLeft, IconBell, IconFileText, IconTrash, IconEdit, IconDots, IconCalendarPlus, IconCurrencyDollar } from '@tabler/icons-react-native';
 import { useSQLiteContext } from "expo-sqlite";
 
 import { StatusBadge } from "@/components/StatusBadge";
@@ -28,15 +28,8 @@ import { cancelServiceReminder } from "@/utils/notifications";
 import { formatDateDisplay, formatTimeDisplay } from "@/utils/dates";
 import type { Service, ServiceStatus } from "@/types";
 import { STATUS_CONFIG } from "@/types";
+import { STATUS_ICONS } from "@/constants/status";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const STATUS_ICONS = {
-  IconClock,
-  IconRefresh,
-  IconPlayerPause,
-  IconCircleCheck,
-  IconCircleX,
-};
 
 const STATUS_TRANSITIONS: Record<ServiceStatus, ServiceStatus[]> = {
   pending: ["in_progress", "postponed", "not_done"],
