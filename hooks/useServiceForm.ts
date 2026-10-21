@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 import { getClients, addClient } from "@/database/clients";
 import { getDefaultServices } from "@/database/default_services";
@@ -61,8 +60,6 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
   const [savedClients, setSavedClients] = useState<Client[]>([]);
   const [defaultServices, setDefaultServices] = useState<DefaultService[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
   const [clientInputBottom, setClientInputBottom] = useState(0);
 
   // ── Data loading ───────────────────────────────────────────────────────────
@@ -135,21 +132,13 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
 
   // ── Date / Time pickers ───────────────────────────────────────────────────
 
-  const onDateChange = useCallback(
-    (_event: DateTimePickerEvent, selectedDate?: Date) => {
-      setShowDatePicker(false);
-      if (selectedDate) setScheduledDate(formatDateISO(selectedDate));
-    },
-    []
-  );
+  const onDateChange = useCallback((selectedDate: Date) => {
+    setScheduledDate(formatDateISO(selectedDate));
+  }, []);
 
-  const onTimeChange = useCallback(
-    (_event: DateTimePickerEvent, selectedTime?: Date) => {
-      setShowTimePicker(false);
-      if (selectedTime) setScheduledTime(formatTimeHHmm(selectedTime));
-    },
-    []
-  );
+  const onTimeChange = useCallback((selectedTime: Date) => {
+    setScheduledTime(formatTimeHHmm(selectedTime));
+  }, []);
 
   // ── Service multi-select ──────────────────────────────────────────────────
 
@@ -256,10 +245,6 @@ export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOption
     handleToggleService,
 
     // Date / Time
-    showDatePicker,
-    setShowDatePicker,
-    showTimePicker,
-    setShowTimePicker,
     onDateChange,
     onTimeChange,
 

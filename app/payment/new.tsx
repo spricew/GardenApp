@@ -1,11 +1,12 @@
-import { View, Text, TextInput, ScrollView, Alert, Platform, Button, Pressable } from "react-native";
+import { View, Text, TextInput, ScrollView, Alert, Button } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useState, useEffect } from "react";
 import { useSQLiteContext } from "expo-sqlite";
-import { IconUser, IconCurrencyDollar, IconCalendar, IconFileText } from "@tabler/icons-react-native";
+import { IconCurrencyDollar, IconCalendar, IconFileText } from "@tabler/icons-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Card } from "@/components/Card";
+import { ClientAutocompleteDropdown, ClientAutocompleteField } from "@/components/ClientAutocomplete";
+import { DateTimeInput } from "@/components/DateTimeInput";
 import { createPaymentDate } from "@/database/payments";
 import { getClients } from "@/database/clients";
 import { formatDateISO } from "@/utils/dates";
@@ -46,10 +47,6 @@ export default function NewPaymentScreen() {
     c.name.toLowerCase().includes(clientName.trim().toLowerCase())
   );
   const showDropdown = isFocused && filteredClients.length > 0 && !exactMatch;
-
-  const onDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (selectedDate) setEstimatedDate(selectedDate);
-  };
 
   const handleSave = async () => {
     if (!clientName.trim()) {
@@ -102,28 +99,13 @@ export default function NewPaymentScreen() {
             <View style={{ zIndex: 50 }}>
               <Card>
                 {/* Client Name */}
-                <View className="mb-5">
-                  <View className="flex-row items-center gap-1.5 mb-2">
-                    <IconUser size={14} color="#343433" strokeWidth={2} />
-                    <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                      Cliente *
-                    </Text>
-                  </View>
-                  <TextInput
-                    value={clientName}
-                    onChangeText={setClientName}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                    onLayout={(e) => {
-                      const layout = e.nativeEvent.layout;
-                      setClientInputBottom(layout.y + layout.height);
-                    }}
-                    placeholder="Nombre del cliente"
-                    className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-                    style={{ borderCurve: "continuous" }}
-                    placeholderTextColor="#a7a7a7"
-                  />
-                </View>
+                <ClientAutocompleteField
+                  value={clientName}
+                  onChangeText={setClientName}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                  onLayoutBottom={setClientInputBottom}
+                />
 
                 {/* Amount */}
                 <View className="mb-5">
@@ -147,79 +129,27 @@ export default function NewPaymentScreen() {
 
               {/* Floating Clients Dropdown */}
               {showDropdown && (
-                <View
-                  className="absolute left-6 right-6 rounded-xl bg-white"
-                  style={{
-                    top: clientInputBottom + 24 + 6,
-                    zIndex: 999,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 10 },
-                    shadowOpacity: 0.14,
-                    shadowRadius: 22,
-                    elevation: 12,
-                    borderCurve: "continuous",
-                    borderWidth: 0.5,
-                    borderColor: "rgba(0,0,0,0.06)",
+                <ClientAutocompleteDropdown
+                  clients={filteredClients}
+                  top={clientInputBottom + 24 + 6}
+                  onSelect={(client) => {
+                    setClientName(client.name);
+                    setIsFocused(false);
                   }}
-                >
-                  <View
-                    className="rounded-xl overflow-hidden"
-                    style={{ borderCurve: "continuous" }}
-                  >
-                    <ScrollView
-                      keyboardShouldPersistTaps="handled"
-                      nestedScrollEnabled
-                      style={{ maxHeight: 324 }}
-                    >
-                      {filteredClients.map((client, index) => (
-                        <Pressable
-                          key={client.id}
-                          onPress={() => {
-                            setClientName(client.name);
-                            setIsFocused(false);
-                          }}
-                          className="active:bg-stone-surface/60"
-                          style={{
-                            paddingHorizontal: 16,
-                            paddingVertical: 12,
-                            borderBottomWidth: index !== filteredClients.length - 1 ? 0.5 : 0,
-                            borderBottomColor: "rgba(0,0,0,0.06)",
-                          }}
-                        >
-                          <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
-                            {client.name}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </ScrollView>
-                  </View>
-                </View>
+                  showAddress={false}
+                />
               )}
             </View>
 
             {/* Date */}
             <Card>
-              <View className="mb-2">
-                <View className="flex-row items-center gap-1.5 mb-2">
-                  <IconCalendar size={14} color="#343433" strokeWidth={2} />
-                  <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                    Fecha Estimada de Pago
-                  </Text>
-                </View>
-                {Platform.OS === "ios" ? (
-                  <DateTimePicker
-                    value={estimatedDate}
-                    mode="date"
-                    display="inline"
-                    onChange={onDateChange}
-                    style={{ alignSelf: "flex-start" }}
-                  />
-                ) : (
-                  <Text className="font-sans text-[15px] text-graphite">
-                    {formatDateISO(estimatedDate)}
-                  </Text>
-                )}
-              </View>
+              <DateTimeInput
+                label="Fecha Estimada de Pago"
+                icon={IconCalendar}
+                value={estimatedDate}
+                mode="date"
+                onChange={setEstimatedDate}
+              />
             </Card>
 
             {/* Notes */}

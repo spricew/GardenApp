@@ -1,28 +1,19 @@
+import { View, Text, TextInput, Pressable } from "react-native";
 import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Platform,
-} from "react-native";
-import {
-  IconUser,
   IconMapPin,
   IconAlignLeft,
   IconCalendar,
   IconClock,
   IconFileText,
   IconCheck,
-  IconStar,
   IconCurrencyDollar,
 } from "@tabler/icons-react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Card } from "./Card";
+import { ClientAutocompleteDropdown, ClientAutocompleteField } from "./ClientAutocomplete";
+import { DateTimeInput } from "./DateTimeInput";
 import { ReminderPicker } from "./ReminderPicker";
 import { useServiceForm } from "@/hooks/useServiceForm";
-import { formatDateForDisplay, formatTimeForDisplay } from "@/utils/dates";
 import type { ServiceFormData } from "@/types";
 
 // Re-export so existing consumers don't break
@@ -49,41 +40,15 @@ export function ServiceForm({
       <View style={{ zIndex: 50 }}>
         <Card>
           {/* Client Name */}
-          <View className="mb-5">
-            <View className="flex-row items-center justify-between mb-2">
-              <View className="flex-row items-center gap-1.5">
-                <IconUser size={14} color="#343433" strokeWidth={2} />
-                <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                  Cliente *
-                </Text>
-              </View>
-              {form.clientName.trim().length > 0 && !form.exactMatch && (
-                <Pressable
-                  onPress={form.handleSaveClient}
-                  className="flex-row items-center gap-1 active:opacity-50"
-                >
-                  <IconStar size={14} color="#f59e0b" strokeWidth={2} />
-                  <Text className="text-amber-500 font-sans text-[13px] font-medium">
-                    Guardar frecuente
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-            <TextInput
-              value={form.clientName}
-              onChangeText={form.setClientName}
-              onFocus={form.handleClientFocus}
-              onBlur={form.handleClientBlur}
-              onLayout={(e) => {
-                const layout = e.nativeEvent.layout;
-                form.handleClientInputLayout(layout.y + layout.height);
-              }}
-              placeholder="Nombre del cliente"
-              className="bg-white border border-stone-surface rounded-lg px-4 py-3 font-sans text-[15px] text-graphite overflow-hidden"
-              style={{ borderCurve: "continuous" }}
-              placeholderTextColor="#a7a7a7"
-            />
-          </View>
+          <ClientAutocompleteField
+            value={form.clientName}
+            onChangeText={form.setClientName}
+            onFocus={form.handleClientFocus}
+            onBlur={form.handleClientBlur}
+            onLayoutBottom={form.handleClientInputLayout}
+            showSaveAction={form.clientName.trim().length > 0 && !form.exactMatch}
+            onSaveClient={form.handleSaveClient}
+          />
 
           {/* Address */}
           <View className="mb-5">
@@ -170,143 +135,35 @@ export function ServiceForm({
 
         {/* Floating Clients Dropdown — rendered outside Card to avoid overflow clip */}
         {form.showDropdown && (
-          <View
-            className="absolute left-6 right-6 rounded-xl bg-white"
-            style={{
-              top: form.clientInputBottom + 24 + 6,
-              zIndex: 999,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.14,
-              shadowRadius: 22,
-              elevation: 12,
-              borderCurve: "continuous",
-              borderWidth: 0.5,
-              borderColor: "rgba(0,0,0,0.06)",
-            }}
-          >
-            <View
-              className="rounded-xl overflow-hidden"
-              style={{ borderCurve: "continuous" }}
-            >
-              <ScrollView
-                keyboardShouldPersistTaps="handled"
-                nestedScrollEnabled
-                style={{ maxHeight: 324 }}
-              >
-                {form.filteredClients.map((client, index) => (
-                  <Pressable
-                    key={client.id}
-                    onPress={() => form.handleSelectClient(client)}
-                    className="active:bg-stone-surface/60"
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 12,
-                      borderBottomWidth:
-                        index !== form.filteredClients.length - 1 ? 0.5 : 0,
-                      borderBottomColor: "rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    <Text className="font-sans text-[16px] text-charcoal-primary font-medium tracking-tight">
-                      {client.name}
-                    </Text>
-                    {client.address && (
-                      <Text
-                        className="font-sans text-[13px] text-ash mt-0.5"
-                        numberOfLines={1}
-                      >
-                        {client.address}
-                      </Text>
-                    )}
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          </View>
+          <ClientAutocompleteDropdown
+            clients={form.filteredClients}
+            top={form.clientInputBottom + 24 + 6}
+            onSelect={form.handleSelectClient}
+          />
         )}
       </View>
 
       {/* Date & Time */}
       <Card>
         <View className="gap-5 mb-5">
-          <View className="w-full">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconCalendar size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Fecha
-              </Text>
-            </View>
-            {Platform.OS === "ios" ? (
-              <DateTimePicker
-                value={form.scheduledDateObj}
-                mode="date"
-                display="inline"
-                onChange={form.onDateChange}
-                minimumDate={new Date()}
-                style={{ alignSelf: "flex-start" }}
-                accentColor="green"
-              />
-            ) : (
-              <Pressable
-                onPress={() => form.setShowDatePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
-                style={{ borderCurve: "continuous" }}
-              >
-                <Text className="font-sans text-[15px] text-graphite">
-                  {formatDateForDisplay(form.scheduledDateObj)}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-          <View className="w-full">
-            <View className="flex-row items-center gap-1.5 mb-2">
-              <IconClock size={14} color="#343433" strokeWidth={2} />
-              <Text className="font-sans font-semibold text-[15px] text-charcoal-primary tracking-tight">
-                Hora
-              </Text>
-            </View>
-            {Platform.OS === "ios" ? (
-              <DateTimePicker
-                value={form.scheduledTimeObj}
-                mode="time"
-                display="compact"
-                onChange={form.onTimeChange}
-                style={{ alignSelf: "flex-start" }}
-                accentColor="green"
-              />
-            ) : (
-              <Pressable
-                onPress={() => form.setShowTimePicker(true)}
-                className="bg-white border border-stone-surface rounded-lg px-4 py-3 overflow-hidden"
-                style={{ borderCurve: "continuous" }}
-              >
-                <Text className="font-sans text-[15px] text-graphite">
-                  {formatTimeForDisplay(form.scheduledTimeObj)}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-        </View>
-
-        {form.showDatePicker && Platform.OS === "android" && (
-          <DateTimePicker
+          <DateTimeInput
+            label="Fecha"
+            icon={IconCalendar}
             value={form.scheduledDateObj}
             mode="date"
-            display="default"
             onChange={form.onDateChange}
             minimumDate={new Date()}
+            accentColor="green"
           />
-        )}
-
-        {form.showTimePicker && Platform.OS === "android" && (
-          <DateTimePicker
+          <DateTimeInput
+            label="Hora"
+            icon={IconClock}
             value={form.scheduledTimeObj}
             mode="time"
-            display="default"
             onChange={form.onTimeChange}
-            is24Hour={false}
+            accentColor="green"
           />
-        )}
+        </View>
       </Card>
 
       {/* Extra Expenses / Notes */}
