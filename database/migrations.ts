@@ -3,9 +3,12 @@ import {
   CREATE_SERVICES_TABLE,
   CREATE_SERVICES_DATE_INDEX,
   CREATE_SERVICES_STATUS_INDEX,
+  CREATE_SERVICES_CLIENT_INDEX,
   CREATE_CLIENTS_TABLE,
   CREATE_DEFAULT_SERVICES_TABLE,
   CREATE_PAYMENT_DATES_TABLE,
+  CREATE_PAYMENT_DATES_DATE_INDEX,
+  CREATE_PAYMENT_DATES_CLIENT_INDEX,
 } from './schema';
 
 export async function migrateDb(db: SQLiteDatabase): Promise<void> {
@@ -13,9 +16,12 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(CREATE_SERVICES_TABLE);
   await db.execAsync(CREATE_SERVICES_DATE_INDEX);
   await db.execAsync(CREATE_SERVICES_STATUS_INDEX);
+  await db.execAsync(CREATE_SERVICES_CLIENT_INDEX);
   await db.execAsync(CREATE_CLIENTS_TABLE);
   await db.execAsync(CREATE_DEFAULT_SERVICES_TABLE);
   await db.execAsync(CREATE_PAYMENT_DATES_TABLE);
+  await db.execAsync(CREATE_PAYMENT_DATES_DATE_INDEX);
+  await db.execAsync(CREATE_PAYMENT_DATES_CLIENT_INDEX);
 
   // Seed default services if empty
   const defaultServicesCount = await db.getFirstAsync<{ count: number }>(`SELECT COUNT(*) as count FROM default_services;`);

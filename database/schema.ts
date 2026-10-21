@@ -24,6 +24,10 @@ export const CREATE_SERVICES_STATUS_INDEX = `
   CREATE INDEX IF NOT EXISTS idx_services_status ON services(status);
 `;
 
+export const CREATE_SERVICES_CLIENT_INDEX = `
+  CREATE INDEX IF NOT EXISTS idx_services_client_name ON services(client_name);
+`;
+
 export const CREATE_CLIENTS_TABLE = `
   CREATE TABLE IF NOT EXISTS clients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,4 +56,12 @@ export const CREATE_PAYMENT_DATES_TABLE = `
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
+`;
+
+export const CREATE_PAYMENT_DATES_DATE_INDEX = `
+  CREATE INDEX IF NOT EXISTS idx_payment_dates_date ON payment_dates(estimated_date);
+`;
+
+export const CREATE_PAYMENT_DATES_CLIENT_INDEX = `
+  CREATE INDEX IF NOT EXISTS idx_payment_dates_client_name ON payment_dates(client_name);
 `;
