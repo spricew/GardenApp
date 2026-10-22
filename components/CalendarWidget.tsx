@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from "react";
 import { View, Text, Pressable } from "react-native";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react-native";
 import { CalendarDay } from "./CalendarDay";
@@ -6,7 +7,6 @@ import {
   getMonthName,
   getDaysInMonth,
   getFirstDayOfMonth,
-  formatDateISO,
 } from "@/utils/dates";
 
 const WEEKDAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -24,7 +24,7 @@ interface CalendarWidgetProps {
   hideCardWrapper?: boolean;
 }
 
-export function CalendarWidget({
+export const CalendarWidget = memo(function CalendarWidget({
   currentYear,
   currentMonth,
   selectedDate,
@@ -38,6 +38,12 @@ export function CalendarWidget({
 }: CalendarWidgetProps) {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+  const monthPrefix = useMemo(
+    () => `${currentYear}-${String(currentMonth).padStart(2, "0")}`,
+    [currentYear, currentMonth]
+  );
+  const serviceDateSet = useMemo(() => new Set(serviceDates), [serviceDates]);
+  const paymentDateSet = useMemo(() => new Set(paymentDates), [paymentDates]);
 
   const goToPrevMonth = () => {
     if (currentMonth === 1) {
@@ -55,18 +61,20 @@ export function CalendarWidget({
     }
   };
 
-  const handleDayPress = (day: number) => {
-    const dateStr = `${currentYear}-${String(currentMonth).padStart(
-      2,
-      "0"
-    )}-${String(day).padStart(2, "0")}`;
-    onDateSelect(dateStr);
-  };
+  const handleDayPress = useCallback(
+    (day: number) => {
+      onDateSelect(`${monthPrefix}-${String(day).padStart(2, "0")}`);
+    },
+    [monthPrefix, onDateSelect]
+  );
 
   // Build calendar grid
-  const calendarDays: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) calendarDays.push(null);
-  for (let d = 1; d <= daysInMonth; d++) calendarDays.push(d);
+  const calendarDays = useMemo(() => {
+    const days: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    return days;
+  }, [daysInMonth, firstDay]);
 
   const content = (
     <>
@@ -102,43 +110,31 @@ export function CalendarWidget({
 
       {/* Calendar Grid */}
       <View className="flex-row flex-wrap mb-2">
-        {calendarDays.map((day, index) => (
-          <View key={index} className="w-[14.28%] py-1.5">
-            {day ? (
+        {calendarDays.map((day, index) => {
+          if (!day) {
+            return (
+              <View key={index} className="w-[14.28%] py-1.5">
+                <View className="w-10 h-10 mx-auto" />
+              </View>
+            );
+          }
+
+          const dateStr = `${monthPrefix}-${String(day).padStart(2, "0")}`;
+
+          return (
+            <View key={index} className="w-[14.28%] py-1.5">
               <CalendarDay
                 day={day}
-                isToday={
-                  todayISO !== undefined &&
-                  formatDateISO(new Date(currentYear, currentMonth - 1, day)) ===
-                  todayISO
-                }
-                isSelected={
-                  formatDateISO(new Date(currentYear, currentMonth - 1, day)) ===
-                  selectedDate
-                }
-                hasServices={serviceDates.includes(
-                  `${currentYear}-${String(currentMonth).padStart(
-                    2,
-                    "0"
-                  )}-${String(day).padStart(2, "0")}`
-                )}
-                hasPayments={paymentDates.includes(
-                  `${currentYear}-${String(currentMonth).padStart(
-                    2,
-                    "0"
-                  )}-${String(day).padStart(2, "0")}`
-                )}
-                isDisabled={
-                  minDate !== undefined &&
-                  `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}` < minDate
-                }
+                isToday={todayISO !== undefined && dateStr === todayISO}
+                isSelected={dateStr === selectedDate}
+                hasServices={serviceDateSet.has(dateStr)}
+                hasPayments={paymentDateSet.has(dateStr)}
+                isDisabled={minDate !== undefined && dateStr < minDate}
                 onPress={handleDayPress}
               />
-            ) : (
-              <View className="w-10 h-10 mx-auto" />
-            )}
-          </View>
-        ))}
+            </View>
+          );
+        })}
       </View>
     </>
   );
@@ -148,4 +144,4 @@ export function CalendarWidget({
   }
 
   return <Card>{content}</Card>;
-}
+});

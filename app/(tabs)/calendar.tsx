@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, ActivityIndicator } from "react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { IconCalendar as CalendarIcon, IconReceipt2, IconHammer } from "@tabler/icons-react-native";
 import { useServices, useServiceDates } from "@/hooks/useServices";
 import { usePayments, usePaymentDates } from "@/hooks/usePayments";
@@ -11,14 +11,18 @@ import { getTodayISO } from "@/utils/dates";
 
 export default function CalendarScreen() {
   const today = getTodayISO();
-  const todayDate = new Date();
 
-  const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth() + 1);
+  const [currentYear, setCurrentYear] = useState(() =>
+    new Date().getFullYear()
+  );
+  const [currentMonth, setCurrentMonth] = useState(
+    () => new Date().getMonth() + 1
+  );
   const [selectedDate, setSelectedDate] = useState(today);
 
   const { dates: serviceDates } = useServiceDates(currentYear, currentMonth);
-  const { dates: paymentDates } = usePaymentDates(currentYear, currentMonth);
+  const { dates: paymentDates, refresh: refreshPaymentDates } =
+    usePaymentDates(currentYear, currentMonth);
 
   const { services, loading: servicesLoading } = useServices(selectedDate);
   const {
@@ -30,14 +34,24 @@ export default function CalendarScreen() {
 
   const loading = servicesLoading || paymentsLoading;
 
-  const handleMonthChange = (year: number, month: number) => {
+  const handleMonthChange = useCallback((year: number, month: number) => {
     setCurrentYear(year);
     setCurrentMonth(month);
-  };
+  }, []);
 
-  const handleDateSelect = (date: string) => {
+  const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date);
-  };
+  }, []);
+
+  const handleDeletePayment = useCallback(
+    async (id: number): Promise<void> => {
+      const success = await removePayment(id);
+      if (success) {
+        await refreshPaymentDates();
+      }
+    },
+    [refreshPaymentDates, removePayment]
+  );
 
   const [, monthStr, dayStr] = selectedDate.split("-");
 
@@ -96,7 +110,7 @@ export default function CalendarScreen() {
                     key={payment.id}
                     payment={payment}
                     onTogglePaid={togglePaid}
-                    onDelete={removePayment}
+                    onDelete={handleDeletePayment}
                   />
                 ))}
               </View>

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 interface CalendarDayProps {
@@ -10,7 +11,7 @@ interface CalendarDayProps {
   onPress: (day: number) => void;
 }
 
-export function CalendarDay({
+export const CalendarDay = memo(function CalendarDay({
   day,
   isToday,
   isSelected,
@@ -71,4 +72,4 @@ export function CalendarDay({
       </View>
     </Pressable>
   );
-}
+});
