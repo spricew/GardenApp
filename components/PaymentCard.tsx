@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { IconCurrencyDollar, IconCheck, IconTrash, IconClock } from "@tabler/icons-react-native";
 import type { PaymentDate } from "@/types";
@@ -9,7 +10,11 @@ interface PaymentCardProps {
   onDelete: (id: number) => void;
 }
 
-export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProps) {
+export const PaymentCard = memo(function PaymentCard({
+  payment,
+  onTogglePaid,
+  onDelete,
+}: PaymentCardProps) {
   const isPaid = payment.is_paid === 1;
 
   const handleDelete = () => {
@@ -110,4 +115,4 @@ export function PaymentCard({ payment, onTogglePaid, onDelete }: PaymentCardProp
       </View>
     </Card>
   );
-}
+});

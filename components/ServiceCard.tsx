@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View, Text, Pressable, ActionSheetIOS, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { IconMapPin, IconClock } from '@tabler/icons-react-native';
@@ -10,7 +11,9 @@ interface ServiceCardProps {
   service: Service;
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export const ServiceCard = memo(function ServiceCard({
+  service,
+}: ServiceCardProps) {
   const router = useRouter();
 
   const handleLongPress = () => {
@@ -73,4 +76,4 @@ export function ServiceCard({ service }: ServiceCardProps) {
       </Card>
     </Pressable>
   );
-}
+});

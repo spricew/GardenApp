@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IconInbox, IconReceipt2 } from '@tabler/icons-react-native';
 import { useServices } from "@/hooks/useServices";
 import { usePayments } from "@/hooks/usePayments";
@@ -27,8 +27,13 @@ export default function TodayScreen() {
 
   const loading = servicesLoading || paymentsLoading;
 
-  const filteredServices =
-    filter === "all" ? services : services.filter((s) => s.status === filter);
+  const filteredServices = useMemo(
+    () =>
+      filter === "all"
+        ? services
+        : services.filter((service) => service.status === filter),
+    [filter, services]
+  );
 
   return (
     <View className="flex-1 bg-warm-canvas mt-4">
