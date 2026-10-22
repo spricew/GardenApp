@@ -7,6 +7,7 @@ import { scheduleServiceReminder } from "@/utils/notifications";
 import type { ServiceFormData } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ServiceForm } from "@/components/ServiceForm";
+import { invalidateServiceDataCache } from "@/utils/dbCache";
 import { getDefaultReminder } from "@/utils/settings";
 
 export default function NewServiceScreen() {
@@ -32,6 +33,7 @@ export default function NewServiceScreen() {
         return;
       }
       const id = createResult.data;
+      invalidateServiceDataCache();
 
       const serviceResult = await getServiceById(db, id);
       if (serviceResult.success && serviceResult.data) {

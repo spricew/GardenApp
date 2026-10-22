@@ -9,6 +9,7 @@ import { ClientAutocompleteDropdown, ClientAutocompleteField } from "@/component
 import { DateTimeInput } from "@/components/DateTimeInput";
 import { createPaymentDate } from "@/database/payments";
 import { useClientAutocomplete } from "@/hooks/useClientAutocomplete";
+import { invalidatePaymentDataCache } from "@/utils/dbCache";
 import { formatDateISO } from "@/utils/dates";
 import type { PaymentDateFormData } from "@/types";
 
@@ -57,6 +58,7 @@ export default function NewPaymentScreen() {
         Alert.alert("Error", result.error?.message || "No se pudo guardar la fecha de pago");
         return;
       }
+      invalidatePaymentDataCache();
       router.back();
     } catch {
       Alert.alert("Error", "No se pudo guardar la fecha de pago");

@@ -20,6 +20,12 @@ import type {
   NamedTotal,
   PaymentTotals,
 } from "@/database/stats";
+import {
+  dbCacheKeys,
+  invalidateDbCache,
+  readDbCache,
+  writeDbCache,
+} from "@/utils/dbCache";
 
 // ── Derived stat types ──────────────────────────────────────────────────────
 
@@ -38,6 +44,12 @@ export interface ExpenseStats extends ExpenseTotals {
   avgExpense: number;
   expenseByService: NamedTotal[];
   expenseByClient: ClientTotal[];
+}
+
+interface DashboardCacheData {
+  serviceStats: ServiceStats;
+  paymentStats: PaymentStats;
+  expenseStats: ExpenseStats;
 }
 
 const EMPTY_PAYMENT_TOTALS: PaymentTotals = {
@@ -86,6 +98,7 @@ function createEmptyExpenseStats(): ExpenseStats {
 
 export function useDashboardStats(year: number, month: number) {
   const db = useSQLiteContext();
+  const cacheKey = dbCacheKeys.dashboard(year, month);
   const [serviceStats, setServiceStats] = useState<ServiceStats>(
     createEmptyServiceStats
   );
@@ -138,6 +151,7 @@ export function useDashboardStats(year: number, month: number) {
       ].find((result) => !result.success);
 
       if (failure) {
+        invalidateDbCache(cacheKey);
         setError(failure.error?.message ?? "Error al cargar estadísticas");
         return;
       }
@@ -148,22 +162,22 @@ export function useDashboardStats(year: number, month: number) {
         byStatus[row.status] = row.count;
       }
 
-      setServiceStats({
+      const nextServiceStats: ServiceStats = {
         total: Object.values(byStatus).reduce((sum, count) => sum + count, 0),
         byStatus,
         topClients: serviceClientsResult.data ?? [],
         topServices: serviceTypesResult.data ?? [],
-      });
+      };
 
       // Payment stats
-      setPaymentStats({
+      const nextPaymentStats: PaymentStats = {
         ...(paymentTotalsResult.data ?? EMPTY_PAYMENT_TOTALS),
         topClients: paymentClientsResult.data ?? [],
-      });
+      };
 
       // Expense stats
       const totals = expenseTotalsResult.data ?? EMPTY_EXPENSE_TOTALS;
-      setExpenseStats({
+      const nextExpenseStats: ExpenseStats = {
         ...totals,
         avgExpense:
           totals.servicesWithExpense > 0
@@ -171,26 +185,49 @@ export function useDashboardStats(year: number, month: number) {
             : 0,
         expenseByService: expenseByServiceResult.data ?? [],
         expenseByClient: expenseByClientResult.data ?? [],
+      };
+
+      setServiceStats(nextServiceStats);
+      setPaymentStats(nextPaymentStats);
+      setExpenseStats(nextExpenseStats);
+      writeDbCache<DashboardCacheData>(cacheKey, {
+        serviceStats: nextServiceStats,
+        paymentStats: nextPaymentStats,
+        expenseStats: nextExpenseStats,
       });
     } catch {
       if (request !== requestId.current) return;
+      invalidateDbCache(cacheKey);
       setError("Error inesperado al cargar estadísticas");
     } finally {
       if (request === requestId.current) {
         setLoading(false);
       }
     }
-  }, [db, year, month]);
+  }, [cacheKey, db, year, month]);
 
   useFocusEffect(
     useCallback(() => {
-      refresh();
+      const cached = readDbCache<DashboardCacheData>(cacheKey);
+      if (cached) {
+        requestId.current++;
+        setServiceStats(cached.serviceStats);
+        setPaymentStats(cached.paymentStats);
+        setExpenseStats(cached.expenseStats);
+        setLoading(false);
+        setError(null);
+        return () => {
+          requestId.current++;
+        };
+      }
+
+      void refresh();
       return () => {
         // Invalidate in-flight queries when the screen blurs or unmounts so a
         // previous month cannot overwrite the currently selected one.
         requestId.current++;
       };
-    }, [refresh])
+    }, [cacheKey, refresh])
   );
 
   return { loading, serviceStats, paymentStats, expenseStats, refresh, error };

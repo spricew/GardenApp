@@ -10,6 +10,7 @@ import {
   updateServiceStatus,
 } from '@/database/services';
 import { useCrud } from '@/hooks/useCrud';
+import { invalidateServiceDataCache } from '@/utils/dbCache';
 import {
   cancelServiceReminder,
   scheduleServiceReminder,
@@ -172,6 +173,7 @@ export function useServiceDetail(
         };
       }
 
+      invalidateServiceDataCache();
       setService((current) =>
         current
           ? {
@@ -226,6 +228,7 @@ export function useServiceDetail(
         };
       }
 
+      invalidateServiceDataCache();
       return { success: true };
     },
     [clearReminder, db, run, scheduleReminderFor, service]
@@ -253,6 +256,7 @@ export function useServiceDetail(
       };
     }
 
+    invalidateServiceDataCache();
     return { success: true };
   }, [clearReminder, db, run, service]);
 

@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { DatabaseResult, Service } from "@/types";
 import * as servicesDb from "@/database/services";
+import { dbCacheKeys } from "@/utils/dbCache";
 import { getTodayISO } from "@/utils/dates";
 import { useListData } from "./useListData";
 import { useMonthDates } from "./useMonthDates";
@@ -17,7 +18,8 @@ export function useServices(date?: string) {
 
   const { data: services, loading, error, refresh } = useListData<Service>(
     load,
-    "Error al cargar servicios"
+    "Error al cargar servicios",
+    { cacheKey: dbCacheKeys.servicesByDate(targetDate) }
   );
 
   return { services, loading, error, refresh };
@@ -30,7 +32,11 @@ export function useServiceDates(year: number, month: number) {
     [year, month]
   );
 
-  const { dates, error } = useMonthDates(load, "Error al cargar fechas");
+  const { dates, error, refresh } = useMonthDates(
+    load,
+    "Error al cargar fechas",
+    dbCacheKeys.serviceDatesByMonth(year, month)
+  );
 
-  return { dates, error };
+  return { dates, error, refresh };
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { updateService, getServiceById, updateServiceNotificationId } from "@/database/services";
 import { scheduleServiceReminder, cancelServiceReminder } from "@/utils/notifications";
+import { invalidateServiceDataCache } from "@/utils/dbCache";
 import type { ServiceFormData, Service } from "@/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ServiceForm, type ServiceFormValues } from "@/components/ServiceForm";
@@ -58,6 +59,8 @@ export default function EditServiceScreen() {
         Alert.alert("Error", updateResult.error?.message || "No se pudo actualizar el servicio");
         return;
       }
+
+      invalidateServiceDataCache();
 
       if (originalService.notification_id) {
         await cancelServiceReminder(originalService.notification_id);

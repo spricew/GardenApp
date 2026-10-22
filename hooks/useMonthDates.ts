@@ -9,17 +9,21 @@ export type MonthDatesLoader = (
 export interface MonthDatesState {
   dates: string[];
   error: string | null;
+  refresh: () => Promise<void>;
 }
 
 /**
  * Loads the distinct dates that have records in a month (for calendar dots).
  * Thin wrapper over `useListData<string>` so loading/refresh/focus handling
- * lives in one place.
+ * lives in one place. `cacheKey` is forwarded to the shared focus cache.
  */
 export function useMonthDates(
   load: MonthDatesLoader,
-  errorMessage: string
+  errorMessage: string,
+  cacheKey?: string
 ): MonthDatesState {
-  const { data, error } = useListData<string>(load, errorMessage);
-  return { dates: data, error };
+  const { data, error, refresh } = useListData<string>(load, errorMessage, {
+    cacheKey,
+  });
+  return { dates: data, error, refresh };
 }
