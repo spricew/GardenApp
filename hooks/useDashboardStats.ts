@@ -23,18 +23,18 @@ import type {
 
 // ── Derived stat types ──────────────────────────────────────────────────────
 
-interface ServiceStats {
+export interface ServiceStats {
   total: number;
   byStatus: Record<ServiceStatus, number>;
   topClients: ClientCount[];
   topServices: NamedCount[];
 }
 
-interface PaymentStats extends PaymentTotals {
+export interface PaymentStats extends PaymentTotals {
   topClients: ClientTotal[];
 }
 
-interface ExpenseStats extends ExpenseTotals {
+export interface ExpenseStats extends ExpenseTotals {
   avgExpense: number;
   expenseByService: NamedTotal[];
   expenseByClient: ClientTotal[];
