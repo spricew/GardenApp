@@ -1,6 +1,6 @@
 import { View, Text, TextInput, ScrollView, Alert, Button } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { IconCurrencyDollar, IconCalendar, IconFileText } from "@tabler/icons-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,9 +8,9 @@ import { Card } from "@/components/Card";
 import { ClientAutocompleteDropdown, ClientAutocompleteField } from "@/components/ClientAutocomplete";
 import { DateTimeInput } from "@/components/DateTimeInput";
 import { createPaymentDate } from "@/database/payments";
-import { getClients } from "@/database/clients";
+import { useClientAutocomplete } from "@/hooks/useClientAutocomplete";
 import { formatDateISO } from "@/utils/dates";
-import type { PaymentDateFormData, Client } from "@/types";
+import type { PaymentDateFormData } from "@/types";
 
 export default function NewPaymentScreen() {
   const router = useRouter();
@@ -22,31 +22,10 @@ export default function NewPaymentScreen() {
   const [estimatedDate, setEstimatedDate] = useState(new Date());
   const [saving, setSaving] = useState(false);
 
-  const [savedClients, setSavedClients] = useState<Client[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
-  const [clientInputBottom, setClientInputBottom] = useState(0);
-
-  useEffect(() => {
-    const loadClients = async () => {
-      try {
-        const result = await getClients(db);
-        if (result.success && result.data) {
-          setSavedClients(result.data);
-        }
-      } catch (e) {
-        // Error handled by state
-      }
-    };
-    loadClients();
-  }, [db]);
-
-  const exactMatch = savedClients.find(
-    (c) => c.name.toLowerCase() === clientName.trim().toLowerCase()
-  );
-  const filteredClients = savedClients.filter((c) =>
-    c.name.toLowerCase().includes(clientName.trim().toLowerCase())
-  );
-  const showDropdown = isFocused && filteredClients.length > 0 && !exactMatch;
+  const autocomplete = useClientAutocomplete({
+    value: clientName,
+    onSelect: (client) => setClientName(client.name),
+  });
 
   const handleSave = async () => {
     if (!clientName.trim()) {
@@ -54,11 +33,21 @@ export default function NewPaymentScreen() {
       return;
     }
 
+    const trimmedAmount = amount.trim();
+    const parsedAmount = trimmedAmount
+      ? Number.parseFloat(trimmedAmount)
+      : null;
+
+    if (parsedAmount !== null && !Number.isFinite(parsedAmount)) {
+      Alert.alert("Error", "El monto debe ser un número válido");
+      return;
+    }
+
     setSaving(true);
     try {
       const data: PaymentDateFormData = {
         client_name: clientName.trim(),
-        amount: amount.trim() ? parseFloat(amount.trim()) : null,
+        amount: parsedAmount,
         estimated_date: formatDateISO(estimatedDate),
         notes: notes.trim(),
       };
@@ -102,9 +91,10 @@ export default function NewPaymentScreen() {
                 <ClientAutocompleteField
                   value={clientName}
                   onChangeText={setClientName}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-                  onLayoutBottom={setClientInputBottom}
+                  onFocus={autocomplete.handleFocus}
+                  onBlur={autocomplete.handleBlur}
+                  onLayoutBottom={autocomplete.handleInputLayout}
+                  error={autocomplete.clientsError ?? undefined}
                 />
 
                 {/* Amount */}
@@ -128,14 +118,11 @@ export default function NewPaymentScreen() {
               </Card>
 
               {/* Floating Clients Dropdown */}
-              {showDropdown && (
+              {autocomplete.showDropdown && (
                 <ClientAutocompleteDropdown
-                  clients={filteredClients}
-                  top={clientInputBottom + 24 + 6}
-                  onSelect={(client) => {
-                    setClientName(client.name);
-                    setIsFocused(false);
-                  }}
+                  clients={autocomplete.filteredClients}
+                  top={autocomplete.inputBottom + 24 + 6}
+                  onSelect={autocomplete.handleSelectClient}
                   showAddress={false}
                 />
               )}

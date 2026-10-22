@@ -14,6 +14,10 @@ interface ClientAutocompleteFieldProps {
   placeholder?: string;
   showSaveAction?: boolean;
   onSaveClient?: () => void;
+  /** Inline validation/load error rendered under the input. */
+  error?: string;
+  /** Disables the save action while it is being persisted. */
+  saving?: boolean;
 }
 
 /**
@@ -32,6 +36,8 @@ export function ClientAutocompleteField({
   placeholder = 'Nombre del cliente',
   showSaveAction = false,
   onSaveClient,
+  error,
+  saving = false,
 }: ClientAutocompleteFieldProps) {
   const canSave = showSaveAction && onSaveClient !== undefined;
 
@@ -47,11 +53,14 @@ export function ClientAutocompleteField({
         {canSave && (
           <Pressable
             onPress={onSaveClient}
-            className="flex-row items-center gap-1 active:opacity-50"
+            disabled={saving}
+            className={`flex-row items-center gap-1 ${
+              saving ? 'opacity-50' : 'active:opacity-50'
+            }`}
           >
             <IconStar size={14} color="#d48f00" strokeWidth={2} />
             <Text className="text-deep-amber font-sans text-[13px] font-medium">
-              Guardar frecuente
+              {saving ? 'Guardando...' : 'Guardar frecuente'}
             </Text>
           </Pressable>
         )}
@@ -70,6 +79,11 @@ export function ClientAutocompleteField({
         style={{ borderCurve: 'continuous' }}
         placeholderTextColor="#a7a7a7"
       />
+      {error ? (
+        <Text className="font-sans text-[12px] text-coral-red mt-1.5">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

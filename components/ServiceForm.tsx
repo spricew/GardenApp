@@ -14,13 +14,13 @@ import { ClientAutocompleteDropdown, ClientAutocompleteField } from "./ClientAut
 import { DateTimeInput } from "./DateTimeInput";
 import { ReminderPicker } from "./ReminderPicker";
 import { useServiceForm } from "@/hooks/useServiceForm";
-import type { ServiceFormData } from "@/types";
+import type { ServiceFormData, ServiceFormValues } from "@/types";
 
 // Re-export so existing consumers don't break
 export type { ServiceFormValues } from "@/types";
 
 interface ServiceFormProps {
-  initialValues?: Parameters<typeof useServiceForm>[0]["initialValues"];
+  initialValues?: Partial<ServiceFormValues>;
   onSubmit: (data: ServiceFormData) => void;
   saving: boolean;
   buttonLabel?: string;
@@ -48,6 +48,8 @@ export function ServiceForm({
             onLayoutBottom={form.handleClientInputLayout}
             showSaveAction={form.clientName.trim().length > 0 && !form.exactMatch}
             onSaveClient={form.handleSaveClient}
+            saving={form.savingClient}
+            error={form.saveClientError ?? form.clientsError ?? undefined}
           />
 
           {/* Address */}
@@ -94,6 +96,12 @@ export function ServiceForm({
               style={{ borderCurve: "continuous" }}
               placeholderTextColor="#a7a7a7"
             />
+
+            {form.servicesError ? (
+              <Text className="font-sans text-[12px] text-coral-red mb-3">
+                {form.servicesError}
+              </Text>
+            ) : null}
 
             {/* Default Services Pills - Multi-select */}
             {form.defaultServices.length > 0 && (

@@ -1,254 +1,90 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useCallback } from 'react';
 
-import { getClients, addClient } from "@/database/clients";
-import { getDefaultServices } from "@/database/default_services";
-import {
-  getTodayISO,
-  formatDateISO,
-  formatTimeHHmm,
-  parseISODateLocal,
-  parseTimeToDate,
-} from "@/utils/dates";
-import type {
-  ServiceFormData,
-  ServiceFormValues,
-  Client,
-  DefaultService,
-} from "@/types";
-
-// ── Types ──────────────────────────────────────────────────────────────────────
+import { useClientAutocomplete } from '@/hooks/useClientAutocomplete';
+import { useServiceFormFields } from '@/hooks/useServiceFormFields';
+import { useServiceMultiSelect } from '@/hooks/useServiceMultiSelect';
+import type { Client, ServiceFormData, ServiceFormValues } from '@/types';
 
 interface UseServiceFormOptions {
   initialValues?: Partial<ServiceFormValues>;
   onSubmit: (data: ServiceFormData) => void;
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────────
+/**
+ * Composes the service form behavior from focused hooks:
+ * field state/validation, client autocomplete and default-service selection.
+ */
+export function useServiceForm({
+  initialValues,
+  onSubmit,
+}: UseServiceFormOptions) {
+  const fields = useServiceFormFields({ initialValues, onSubmit });
+  const { setAddress, setClientName } = fields;
 
-export function useServiceForm({ initialValues, onSubmit }: UseServiceFormOptions) {
-  const db = useSQLiteContext();
-
-  // Form fields — dates/times are stored as ISO strings, matching ServiceFormData.
-  const [clientName, setClientName] = useState(initialValues?.client_name || "");
-  const [address, setAddress] = useState(initialValues?.address || "");
-  const [description, setDescription] = useState(initialValues?.description || "");
-  const [notes, setNotes] = useState(initialValues?.notes || "");
-  const [expense, setExpense] = useState(initialValues?.expense || "");
-  const [reminderMinutes, setReminderMinutes] = useState(
-    initialValues?.reminder_minutes ?? 2880
-  );
-  const [scheduledDate, setScheduledDate] = useState(
-    initialValues?.scheduled_date || getTodayISO()
-  );
-  const [scheduledTime, setScheduledTime] = useState(
-    initialValues?.scheduled_time || formatTimeHHmm(new Date())
-  );
-
-  // Derived Date objects — only the native pickers need them.
-  const scheduledDateObj = useMemo(
-    () => parseISODateLocal(scheduledDate),
-    [scheduledDate]
-  );
-  const scheduledTimeObj = useMemo(
-    () => parseTimeToDate(scheduledTime),
-    [scheduledTime]
-  );
-
-  // UI state
-  const [savedClients, setSavedClients] = useState<Client[]>([]);
-  const [defaultServices, setDefaultServices] = useState<DefaultService[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
-  const [clientInputBottom, setClientInputBottom] = useState(0);
-
-  // ── Data loading ───────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [clientsResult, servicesResult] = await Promise.all([
-          getClients(db),
-          getDefaultServices(db),
-        ]);
-        if (clientsResult.success && clientsResult.data) {
-          setSavedClients(clientsResult.data);
-        }
-        if (servicesResult.success && servicesResult.data) {
-          setDefaultServices(servicesResult.data);
-        }
-      } catch (e) {
-        // Error handled by state
-      }
-    };
-    loadData();
-  }, [db]);
-
-  // ── Client logic ──────────────────────────────────────────────────────────
-
-  const handleSaveClient = useCallback(async () => {
-    if (!clientName.trim()) return;
-    try {
-      const result = await addClient(db, clientName.trim(), address.trim());
-      if (!result.success) {
-        Alert.alert("Error", result.error?.message || "No se pudo guardar el cliente");
-        return;
-      }
-      const clientsResult = await getClients(db);
-      if (clientsResult.success && clientsResult.data) {
-        setSavedClients(clientsResult.data);
-      }
-    } catch (e) {
-      Alert.alert("Error", "No se pudo guardar el cliente");
-    }
-  }, [db, clientName, address]);
-
-  const exactMatch = savedClients.find(
-    (c) => c.name.toLowerCase() === clientName.trim().toLowerCase()
-  );
-
-  const filteredClients = savedClients.filter((c) =>
-    c.name.toLowerCase().includes(clientName.trim().toLowerCase())
-  );
-
-  const showDropdown = isFocused && filteredClients.length > 0 && !exactMatch;
-
-  const handleSelectClient = useCallback((client: Client) => {
-    setClientName(client.name);
-    if (client.address) setAddress(client.address);
-    setIsFocused(false);
-  }, []);
-
-  const handleClientFocus = useCallback(() => setIsFocused(true), []);
-  const handleClientBlur = useCallback(
-    () => setTimeout(() => setIsFocused(false), 200),
-    []
-  );
-
-  const handleClientInputLayout = useCallback(
-    (bottom: number) => setClientInputBottom(bottom),
-    []
-  );
-
-  // ── Date / Time pickers ───────────────────────────────────────────────────
-
-  const onDateChange = useCallback((selectedDate: Date) => {
-    setScheduledDate(formatDateISO(selectedDate));
-  }, []);
-
-  const onTimeChange = useCallback((selectedTime: Date) => {
-    setScheduledTime(formatTimeHHmm(selectedTime));
-  }, []);
-
-  // ── Service multi-select ──────────────────────────────────────────────────
-
-  const selectedServices = description
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const isServiceSelected = useCallback(
-    (serviceName: string) => {
-      const target = serviceName.trim().toLowerCase();
-      return selectedServices.some((s) => s.toLowerCase() === target);
+  const handleClientSelect = useCallback(
+    (client: Client): void => {
+      setClientName(client.name);
+      if (client.address) setAddress(client.address);
     },
-    [selectedServices]
+    [setAddress, setClientName]
   );
 
-  const handleToggleService = useCallback(
-    (serviceName: string) => {
-      const target = serviceName.trim();
-      const selected = isServiceSelected(target);
+  const clients = useClientAutocomplete({
+    value: fields.clientName,
+    address: fields.address,
+    onSelect: handleClientSelect,
+  });
 
-      let updated: string[];
-      if (selected) {
-        updated = selectedServices.filter(
-          (s) => s.toLowerCase() !== target.toLowerCase()
-        );
-      } else {
-        updated = [...selectedServices, target];
-      }
-
-      setDescription(updated.join(", "));
-    },
-    [selectedServices, isServiceSelected]
+  const services = useServiceMultiSelect(
+    fields.description,
+    fields.setDescription
   );
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-
-  const handleSubmit = useCallback(() => {
-    if (!clientName.trim()) {
-      Alert.alert("Error", "El nombre del cliente es obligatorio");
-      return;
-    }
-
-    const data: ServiceFormData = {
-      client_name: clientName.trim(),
-      address: address.trim(),
-      description: description.trim(),
-      scheduled_date: scheduledDate,
-      scheduled_time: scheduledTime,
-      notes: notes.trim(),
-      reminder_minutes: reminderMinutes,
-      expense: expense.trim() ? parseFloat(expense.trim()) : null,
-    };
-
-    onSubmit(data);
-  }, [
-    clientName,
-    address,
-    description,
-    scheduledDate,
-    scheduledTime,
-    notes,
-    reminderMinutes,
-    expense,
-    onSubmit,
-  ]);
-
-  // ── Return ────────────────────────────────────────────────────────────────
 
   return {
-    // Form fields
-    clientName,
-    setClientName,
-    address,
-    setAddress,
-    description,
-    setDescription,
-    notes,
-    setNotes,
-    expense,
-    setExpense,
-    reminderMinutes,
-    setReminderMinutes,
-    scheduledDate,
-    scheduledTime,
-    scheduledDateObj,
-    scheduledTimeObj,
+    // Fields
+    clientName: fields.clientName,
+    setClientName: fields.setClientName,
+    address: fields.address,
+    setAddress: fields.setAddress,
+    description: fields.description,
+    setDescription: fields.setDescription,
+    notes: fields.notes,
+    setNotes: fields.setNotes,
+    expense: fields.expense,
+    setExpense: fields.setExpense,
+    reminderMinutes: fields.reminderMinutes,
+    setReminderMinutes: fields.setReminderMinutes,
+    scheduledDate: fields.scheduledDate,
+    scheduledTime: fields.scheduledTime,
+    scheduledDateObj: fields.scheduledDateObj,
+    scheduledTimeObj: fields.scheduledTimeObj,
 
     // Client autocomplete
-    filteredClients,
-    exactMatch,
-    showDropdown,
-    clientInputBottom,
-    handleSaveClient,
-    handleSelectClient,
-    handleClientFocus,
-    handleClientBlur,
-    handleClientInputLayout,
+    filteredClients: clients.filteredClients,
+    exactMatch: clients.exactMatch,
+    showDropdown: clients.showDropdown,
+    clientInputBottom: clients.inputBottom,
+    clientsError: clients.clientsError,
+    saveClientError: clients.saveClientError,
+    savingClient: clients.savingClient,
+    handleSaveClient: clients.handleSaveClient,
+    handleSelectClient: clients.handleSelectClient,
+    handleClientFocus: clients.handleFocus,
+    handleClientBlur: clients.handleBlur,
+    handleClientInputLayout: clients.handleInputLayout,
 
-    // Services
-    defaultServices,
-    selectedServices,
-    isServiceSelected,
-    handleToggleService,
+    // Default services
+    defaultServices: services.defaultServices,
+    servicesError: services.servicesError,
+    selectedServices: services.selectedServices,
+    isServiceSelected: services.isServiceSelected,
+    handleToggleService: services.handleToggleService,
 
-    // Date / Time
-    onDateChange,
-    onTimeChange,
+    // Date / time
+    onDateChange: fields.onDateChange,
+    onTimeChange: fields.onTimeChange,
 
     // Submit
-    handleSubmit,
+    handleSubmit: fields.handleSubmit,
   };
 }
