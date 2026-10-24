@@ -4,6 +4,23 @@ import { createDatabaseResult, createDatabaseError } from "@/types";
 import { getMonthRange } from "@/utils/dates";
 import { getRepository } from "./repository";
 
+/**
+ * Every scheduled service, ordered by date and time.
+ *
+ * The home agenda loads the full set once and groups it by date in memory, so
+ * switching status filters or expanding the history does not hit the database
+ * again. `scheduled_time IS NULL` keeps services without a time at the end of
+ * their day instead of before the first timed service.
+ */
+export async function getAllServices(db: SQLiteDatabase): Promise<DatabaseResult<Service[]>> {
+  return getRepository(db).all<Service>(
+    `SELECT * FROM services
+     ORDER BY scheduled_date ASC, scheduled_time IS NULL ASC, scheduled_time ASC`,
+    [],
+    'Error al obtener todos los servicios'
+  );
+}
+
 export async function getServicesByDate(db: SQLiteDatabase, date: string): Promise<DatabaseResult<Service[]>> {
   return getRepository(db).all<Service>(
     'SELECT * FROM services WHERE scheduled_date = ? ORDER BY scheduled_time ASC',

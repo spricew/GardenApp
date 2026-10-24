@@ -20,6 +20,7 @@ function formatMonthKey(year: number, month: number): string {
 
 /** Stable keys shared by the hooks that read and invalidate cached queries. */
 export const dbCacheKeys = {
+  allServices: "services:all",
   servicesByDate: (date: string): string => `services:date:${date}`,
   serviceDatesByMonth: (year: number, month: number): string =>
     `services:dates:${formatMonthKey(year, month)}`,

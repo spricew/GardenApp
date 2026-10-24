@@ -25,6 +25,27 @@ export function useServices(date?: string) {
   return { services, loading, error, refresh };
 }
 
+/**
+ * Loads every scheduled service for the agenda home screen.
+ * Grouping by date and filtering by status happen in memory so the database
+ * is only queried when the screen gains focus or data is mutated.
+ */
+export function useAllServices() {
+  const load = useCallback(
+    (db: SQLiteDatabase): Promise<DatabaseResult<Service[]>> =>
+      servicesDb.getAllServices(db),
+    []
+  );
+
+  const { data: services, loading, error, refresh } = useListData<Service>(
+    load,
+    "Error al cargar servicios",
+    { cacheKey: dbCacheKeys.allServices }
+  );
+
+  return { services, loading, error, refresh };
+}
+
 export function useServiceDates(year: number, month: number) {
   const load = useCallback(
     (db: SQLiteDatabase): Promise<DatabaseResult<string[]>> =>

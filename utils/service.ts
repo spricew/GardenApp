@@ -1,4 +1,4 @@
-import type { ServiceStatus } from '@/types';
+import type { Service, ServiceStatus } from '@/types';
 import { formatDateISO, getTodayISO, parseISODateLocal } from '@/utils/dates';
 
 /**
@@ -23,6 +23,87 @@ export function getStatusTransitions(
   status: ServiceStatus
 ): readonly ServiceStatus[] {
   return STATUS_TRANSITIONS[status] ?? [];
+}
+
+export interface ServiceDateGroup {
+  /** ISO date (`YYYY-MM-DD`) shared by every service in the group. */
+  date: string;
+  services: Service[];
+}
+
+export interface ServiceAgenda {
+  /** Today and future dates, ascending. */
+  upcoming: ServiceDateGroup[];
+  /** Dates before today, descending (most recent first). */
+  past: ServiceDateGroup[];
+}
+
+/** Keeps the agenda order stable even if the caller passes unsorted rows. */
+function compareServicesByDateAndTime(a: Service, b: Service): number {
+  if (a.scheduled_date !== b.scheduled_date) {
+    return a.scheduled_date.localeCompare(b.scheduled_date);
+  }
+
+  // Services without a time belong to the end of the day.
+  const timeA = a.scheduled_time ?? '99:99';
+  const timeB = b.scheduled_time ?? '99:99';
+  return timeA.localeCompare(timeB);
+}
+
+/**
+ * Groups services by their scheduled date, preserving ascending date/time
+ * order inside each group.
+ */
+export function groupServicesByDate(
+  services: readonly Service[]
+): ServiceDateGroup[] {
+  const ordered = [...services].sort(compareServicesByDateAndTime);
+  const groups: ServiceDateGroup[] = [];
+
+  for (const service of ordered) {
+    const currentGroup = groups[groups.length - 1];
+    if (currentGroup && currentGroup.date === service.scheduled_date) {
+      currentGroup.services.push(service);
+    } else {
+      groups.push({ date: service.scheduled_date, services: [service] });
+    }
+  }
+
+  return groups;
+}
+
+/**
+ * Splits a service list into the two halves the agenda home screen renders:
+ * upcoming dates (today included) and past dates.
+ */
+export function splitServiceAgenda(
+  services: readonly Service[],
+  todayISO: string = getTodayISO()
+): ServiceAgenda {
+  const upcoming: ServiceDateGroup[] = [];
+  const past: ServiceDateGroup[] = [];
+
+  for (const group of groupServicesByDate(services)) {
+    if (group.date >= todayISO) {
+      upcoming.push(group);
+    } else {
+      past.push(group);
+    }
+  }
+
+  // Past dates read better from the most recent one backwards.
+  past.reverse();
+
+  return { upcoming, past };
+}
+
+/** Applies the status chip selection without touching the database. */
+export function filterServicesByStatus(
+  services: readonly Service[],
+  status: ServiceStatus | 'all'
+): Service[] {
+  if (status === 'all') return [...services];
+  return services.filter((service) => service.status === status);
 }
 
 /** Human-readable reminder lead time used by the service detail screen. */

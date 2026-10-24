@@ -3,6 +3,60 @@ export function getTodayISO(): string {
   return formatDateISO(now);
 }
 
+/** Capitalizes the first letter of a localized string ("sábado" → "Sábado"). */
+export function capitalizeFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/**
+ * Day difference between two ISO dates (`to - from`).
+ * Uses UTC day numbers so DST changes cannot produce 23/25-hour days.
+ */
+function getDayDifference(fromISO: string, toISO: string): number {
+  const [fromYear, fromMonth, fromDay] = fromISO.split('-').map(Number);
+  const [toYear, toMonth, toDay] = toISO.split('-').map(Number);
+  const fromDayNumber = Date.UTC(fromYear, fromMonth - 1, fromDay);
+  const toDayNumber = Date.UTC(toYear, toMonth - 1, toDay);
+  return Math.round((toDayNumber - fromDayNumber) / 86_400_000);
+}
+
+/**
+ * Relative label for agenda group headers.
+ * Only the closest days get a label; older/future dates fall back to the
+ * formatted calendar date.
+ */
+export function getRelativeDateLabel(
+  dateStr: string,
+  todayISO: string = getTodayISO()
+): string | null {
+  const difference = getDayDifference(todayISO, dateStr);
+
+  if (difference === 0) return 'Hoy';
+  if (difference === 1) return 'Mañana';
+  if (difference === -1) return 'Ayer';
+  return null;
+}
+
+/**
+ * Long date for agenda section headers, e.g. "Sábado, 24 de octubre".
+ * The year is included only when the date belongs to another year.
+ */
+export function formatAgendaDate(
+  dateStr: string,
+  todayISO: string = getTodayISO()
+): string {
+  const date = parseISODateLocal(dateStr);
+  const currentYear = parseISODateLocal(todayISO).getFullYear();
+  const formatted = date.toLocaleDateString('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(date.getFullYear() !== currentYear ? { year: 'numeric' } : {}),
+  });
+
+  return capitalizeFirst(formatted);
+}
+
 export function formatDateISO(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
