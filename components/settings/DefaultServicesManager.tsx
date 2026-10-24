@@ -50,7 +50,7 @@ export function DefaultServicesManager() {
   useFocusEffect(
     useCallback(() => {
       loadServices();
-    }, [loadServices])
+    }, [loadServices]),
   );
 
   const handleAdd = async () => {
@@ -63,7 +63,10 @@ export function DefaultServicesManager() {
     try {
       const result = await addDefaultService(db, newName.trim());
       if (!result.success) {
-        Alert.alert("Error", result.error?.message || "No se pudo agregar el servicio");
+        Alert.alert(
+          "Error",
+          result.error?.message || "No se pudo agregar el servicio",
+        );
         return;
       }
       setNewName("");
@@ -88,7 +91,10 @@ export function DefaultServicesManager() {
             try {
               const result = await removeDefaultService(db, id);
               if (!result.success) {
-                Alert.alert("Error", result.error?.message || "No se pudo eliminar el servicio");
+                Alert.alert(
+                  "Error",
+                  result.error?.message || "No se pudo eliminar el servicio",
+                );
                 return;
               }
               await loadServices();
@@ -97,7 +103,7 @@ export function DefaultServicesManager() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -160,7 +166,7 @@ export function DefaultServicesManager() {
         </View>
 
         {/* List of Services */}
-        <View>
+        <Card>
           <Text className="font-sans text-[13px] font-semibold text-graphite/70 uppercase tracking-wider mb-2 ml-2">
             Servicios Guardados ({services.length})
           </Text>
@@ -207,7 +213,7 @@ export function DefaultServicesManager() {
               ))}
             </View>
           )}
-        </View>
+        </Card>
       </View>
     </ScrollView>
   );
