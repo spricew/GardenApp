@@ -1,11 +1,8 @@
 import { Tabs } from "expo-router";
 import { View, Text } from "react-native";
 import { IconHome, IconCalendar, IconSettings, IconChartBar } from '@tabler/icons-react-native';
-import { getTodayISO, formatDateDisplay } from "@/utils/dates";
 
 export default function TabsLayout() {
-  const today = formatDateDisplay(getTodayISO());
-
   return (
     <Tabs
       screenOptions={{
@@ -43,10 +40,10 @@ export default function TabsLayout() {
           headerTitle: () => (
             <View>
               <Text style={{ fontFamily: "Family", fontSize: 23, fontWeight: "500", color: "#343433", letterSpacing: -0.44, textAlign: "center" }}>
-                Hoy
+                Agenda
               </Text>
-              <Text style={{ fontFamily: "Inter", fontSize: 13, color: "#848281", marginTop: 2, textTransform: "capitalize", textAlign: "center" }}>
-                {today}
+              <Text style={{ fontFamily: "Inter", fontSize: 13, color: "#848281", marginTop: 2, textAlign: "center" }}>
+                Próximos e historial
               </Text>
             </View>
           ),
